@@ -67,7 +67,10 @@
   var themeBtn = el("button", { class: "icon-btn", "aria-label": "テーマ切替", text: "◐" });
   var header = el("header", { class: "site-header" }, [
     menuBtn,
-    el("a", { class: "site-title", href: ROOT, text: "Algorithm Notes" }),
+    el("a", { class: "site-title", href: ROOT }, [
+      el("img", { class: "site-logo", src: ROOT + "assets/icon.svg", alt: "" }),
+      document.createTextNode("Algorithm Notes")
+    ]),
     el("span", { class: "spacer" }),
     themeBtn
   ]);

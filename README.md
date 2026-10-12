@@ -11,6 +11,7 @@ algo-notes/
 │   ├── nav-data.js         ★ サイドバーの構成（ページを増やしたらここに追記）
 │   ├── site.js             ヘッダー・サイドバー・パンくず・子ページ一覧を生成
 │   ├── diagram.js          セグ木・BIT の図(SVG)をステップ表示
+│   ├── icon.svg            サイトのアイコン（favicon・ヘッダーのロゴ）
 │   └── style.css
 ├── data-structure/index.html       分類ページ
 │   ├── fenwick-tree/index.html     アルゴリズムページ（画像は同じフォルダに置く）
@@ -29,7 +30,11 @@ algo-notes/
    ```html
    <body data-root="../../" data-path="graph/dijkstra/">
    ```
-3. `assets/nav-data.js` の該当分類の `children` に追記
+3. `<head>` にアイコンを書く（パスは `data-root` に合わせる）
+   ```html
+   <link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+   ```
+4. `assets/nav-data.js` の該当分類の `children` に追記
    ```js
    { title: "ダイクストラ法", path: "graph/dijkstra/", desc: "非負重みの最短経路" }
    ```
