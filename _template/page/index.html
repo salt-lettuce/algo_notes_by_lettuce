@@ -1,0 +1,91 @@
+<!doctype html>
+<!--
+  アルゴリズムページのテンプレート
+  使い方:
+    1. このフォルダ(page/)を 分類/ページ名/ にコピーする(例: graph/dijkstra/)
+    2. 「★」の付いた箇所を書き換え,不要なコメントや任意のセクションは消す
+    3. assets/nav-data.js の該当分類の children に追記する
+  書式のルール:
+    - 計算量は $O(\log N)$ のように MathJax で書く(表の中も同じ)
+    - 句読点は「,」「.」
+    - コードは <pre><code class="language-python">,実行結果は <pre class="output"><code class="nohighlight">
+    - 表は必ず <div class="table-wrap"> で囲む
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>★英語名 | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<!-- ★ data-path はサイトのルートからのパス(末尾は "/") -->
+<body data-root="../../" data-path="★分類/ページ名/">
+
+<h1>★英語名（★日本語名）</h1>
+<p class="lead">★〜なアルゴリズム/データ構造について解説します.</p>
+<!-- 任意:参考にしたページ -->
+<p>参考：<a href="★URL">★サイト名</a></p>
+
+<!-- ===== 概要:何ができるか + 計算量の表 ===== -->
+<h2>★名前について</h2>
+<p>★何をするものか,何がうれしいのかを2〜3文で.</p>
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>★使い道1</li>
+<li>★使い道2</li>
+</ul>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td>★操作1</td><td>$O(\log N)$</td></tr>
+<tr><td>★操作2</td><td>$O(N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ===== しくみ:操作ごとに h2,細かい話は h3 ===== -->
+<h2>★操作・しくみ1</h2>
+<p>★説明.</p>
+
+<!-- 任意:図(書式は assets/diagram.js 冒頭のコメント参照.steps を2つ以上書くとクリックで進む) -->
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{"type": "array", "n": 4, "indexRow": true, "values": [3, 1, 4, 1], "steps": [{"text": "★1段階目の説明"}, {"text": "★2段階目の説明", "hl": {"cur": [1]}}]}
+</script>
+</figure>
+
+<h3>★補足</h3>
+<p>★説明.</p>
+
+<!-- ===== ライブラリでの実装:コード + 実行結果 + 操作一覧 ===== -->
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) には★名前のライブラリが存在します.</p>
+
+<pre><code class="language-python">from atcoder.★module import ★Class
+
+★コード</code></pre>
+<pre class="output"><code class="nohighlight">★実行結果</code></pre>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>★method(x)</code></td><td>★内容</td><td>$O(\log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- 任意:使い方の例,似たアルゴリズムとの比較など -->
+<h2>★使い方 / ★〇〇との比較</h2>
+<p>★説明.</p>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

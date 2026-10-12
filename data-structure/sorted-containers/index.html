@@ -11,7 +11,7 @@
 <body data-root="../../" data-path="data-structure/sorted-containers/">
 
 <h1>SortedContainers</h1>
-<p class="lead">高速に整列された入れ物を扱うことができるSortedContainersについて解説していきます.</p>
+<p class="lead">高速に整列された入れ物を扱うことができるSortedContainersについて解説します.</p>
 <p>参考：<a href="https://algo-method.com/courses/f102a001a27ba1cc">アルゴ式</a></p>
 
 <h2>SortedContainersについて</h2>
@@ -22,9 +22,9 @@
 <table>
 <thead><tr><th>クラス</th><th>用途</th><th>主な操作の計算量</th></tr></thead>
 <tbody>
-<tr><td><code>SortedList</code></td><td>重複ありのソート済みリスト(multiset)</td><td>追加・削除・インデックスアクセス・二分探索 O(logN)</td></tr>
-<tr><td><code>SortedSet</code></td><td>重複なしのソート済み集合(set)</td><td>追加・削除・インデックスアクセス・二分探索 O(logN)</td></tr>
-<tr><td><code>SortedDict</code></td><td>キー順に並んだ辞書(map)</td><td>追加・削除・k番目のキー取得 O(logN)</td></tr>
+<tr><td><code>SortedList</code></td><td>重複ありのソート済みリスト(multiset)</td><td>追加・削除・インデックスアクセス・二分探索 $O(\log N)$</td></tr>
+<tr><td><code>SortedSet</code></td><td>重複なしのソート済み集合(set)</td><td>追加・削除・インデックスアクセス・二分探索 $O(\log N)$</td></tr>
+<tr><td><code>SortedDict</code></td><td>キー順に並んだ辞書(map)</td><td>追加・削除・k番目のキー取得 $O(\log N)$</td></tr>
 </tbody>
 </table>
 </div>
@@ -53,18 +53,18 @@ SortedList([1, 3, 5])</code></pre>
 <table>
 <thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
 <tbody>
-<tr><td><code>sl.add(value)</code></td><td>要素 <code>value</code> を追加し,ソート状態を維持する</td><td>O(logN)</td></tr>
-<tr><td><code>sl.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>O(logN)</td></tr>
-<tr><td><code>sl.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>O(logN)</td></tr>
-<tr><td><code>sl.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>O(logN)</td></tr>
-<tr><td><code>sl[index]</code></td><td><code>index</code> 番目の要素を取得する (ランダムアクセス)</td><td>O(logN)</td></tr>
-<tr><td><code>value in sl</code></td><td><code>value</code> が含まれているか判定する</td><td>O(logN)</td></tr>
-<tr><td><code>sl.bisect_left(value)</code></td><td><code>value</code> 以上の要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
-<tr><td><code>sl.bisect_right(value)</code></td><td><code>value</code> より大きい要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
-<tr><td><code>sl.count(value)</code></td><td>要素 <code>value</code> の個数を返す</td><td>O(logN)</td></tr>
-<tr><td><code>sl.index(value)</code></td><td>要素 <code>value</code> が最初に現れるインデックスを返す</td><td>O(logN)</td></tr>
-<tr><td><code>len(sl)</code></td><td>要素数を返す</td><td>O(1)</td></tr>
-<tr><td><code>sl.clear()</code></td><td>全要素を削除する</td><td>O(N)</td></tr>
+<tr><td><code>sl.add(value)</code></td><td>要素 <code>value</code> を追加し,ソート状態を維持する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl[index]</code></td><td><code>index</code> 番目の要素を取得する (ランダムアクセス)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>value in sl</code></td><td><code>value</code> が含まれているか判定する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.bisect_left(value)</code></td><td><code>value</code> 以上の要素が現れる最初のインデックスを返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.bisect_right(value)</code></td><td><code>value</code> より大きい要素が現れる最初のインデックスを返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.count(value)</code></td><td>要素 <code>value</code> の個数を返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sl.index(value)</code></td><td>要素 <code>value</code> が最初に現れるインデックスを返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>len(sl)</code></td><td>要素数を返す</td><td>$O(1)$</td></tr>
+<tr><td><code>sl.clear()</code></td><td>全要素を削除する</td><td>$O(N)$</td></tr>
 </tbody>
 </table>
 </div>
@@ -93,17 +93,17 @@ SortedSet([2, 3, 5])</code></pre>
 <table>
 <thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
 <tbody>
-<tr><td><code>ss.add(value)</code></td><td>要素 <code>value</code> を追加する (重複は無視)</td><td>O(logN)</td></tr>
-<tr><td><code>ss.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>O(logN)</td></tr>
-<tr><td><code>ss.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>O(logN)</td></tr>
-<tr><td><code>ss.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>O(logN)</td></tr>
-<tr><td><code>ss[index]</code></td><td><code>index</code> 番目の要素を取得する</td><td>O(logN)</td></tr>
-<tr><td><code>value in ss</code></td><td><code>value</code> が含まれているか判定する</td><td>O(logN)</td></tr>
-<tr><td><code>ss.bisect_left(value)</code></td><td><code>value</code> 以上の要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
-<tr><td><code>ss.bisect_right(value)</code></td><td><code>value</code> より大きい要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
-<tr><td><code>ss.index(value)</code></td><td>要素 <code>value</code> のインデックスを返す</td><td>O(logN)</td></tr>
-<tr><td><code>len(ss)</code></td><td>要素数を返す</td><td>O(1)</td></tr>
-<tr><td><code>ss.clear()</code></td><td>全要素を削除する</td><td>O(N)</td></tr>
+<tr><td><code>ss.add(value)</code></td><td>要素 <code>value</code> を追加する (重複は無視)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss[index]</code></td><td><code>index</code> 番目の要素を取得する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>value in ss</code></td><td><code>value</code> が含まれているか判定する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss.bisect_left(value)</code></td><td><code>value</code> 以上の要素が現れる最初のインデックスを返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss.bisect_right(value)</code></td><td><code>value</code> より大きい要素が現れる最初のインデックスを返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>ss.index(value)</code></td><td>要素 <code>value</code> のインデックスを返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>len(ss)</code></td><td>要素数を返す</td><td>$O(1)$</td></tr>
+<tr><td><code>ss.clear()</code></td><td>全要素を削除する</td><td>$O(N)$</td></tr>
 </tbody>
 </table>
 </div>
@@ -132,16 +132,16 @@ banana</code></pre>
 <table>
 <thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
 <tbody>
-<tr><td><code>sd[key] = value</code></td><td>キーと値を設定する (キー順に自動ソート)</td><td>O(logN)</td></tr>
-<tr><td><code>del sd[key]</code></td><td>指定した <code>key</code> を削除する</td><td>O(logN)</td></tr>
-<tr><td><code>sd.pop(key)</code></td><td>指定した <code>key</code> を削除し,値を返す</td><td>O(logN)</td></tr>
-<tr><td><code>sd.popitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を削除して返す</td><td>O(logN)</td></tr>
-<tr><td><code>sd.peekitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を取得する (削除しない)</td><td>O(logN)</td></tr>
-<tr><td><code>key in sd</code></td><td><code>key</code> が含まれているか判定する</td><td>O(logN)</td></tr>
-<tr><td><code>sd.keys()[index]</code></td><td>ソート順で <code>index</code> 番目のキーを取得する</td><td>O(logN)</td></tr>
-<tr><td><code>sd.values()[index]</code></td><td>ソート順で <code>index</code> 番目の値を取得する</td><td>O(logN)</td></tr>
-<tr><td><code>len(sd)</code></td><td>キーの個数を返す</td><td>O(1)</td></tr>
-<tr><td><code>sd.clear()</code></td><td>全要素を削除する</td><td>O(N)</td></tr>
+<tr><td><code>sd[key] = value</code></td><td>キーと値を設定する (キー順に自動ソート)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>del sd[key]</code></td><td>指定した <code>key</code> を削除する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sd.pop(key)</code></td><td>指定した <code>key</code> を削除し,値を返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sd.popitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を削除して返す</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sd.peekitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を取得する (削除しない)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>key in sd</code></td><td><code>key</code> が含まれているか判定する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sd.keys()[index]</code></td><td>ソート順で <code>index</code> 番目のキーを取得する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>sd.values()[index]</code></td><td>ソート順で <code>index</code> 番目の値を取得する</td><td>$O(\log N)$</td></tr>
+<tr><td><code>len(sd)</code></td><td>キーの個数を返す</td><td>$O(1)$</td></tr>
+<tr><td><code>sd.clear()</code></td><td>全要素を削除する</td><td>$O(N)$</td></tr>
 </tbody>
 </table>
 </div>

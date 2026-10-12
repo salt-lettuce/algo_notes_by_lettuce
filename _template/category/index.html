@@ -1,0 +1,29 @@
+<!doctype html>
+<!--
+  分類ページのテンプレート
+  使い方:
+    1. このフォルダ(category/)を サイトのルート直下に 分類名/ としてコピーする(例: graph/)
+    2. 「★」の付いた箇所を書き換える
+    3. assets/nav-data.js の一番外側に { title, path, desc, children: [] } を追記する
+  子ページのカード一覧は <div data-children></div> に自動で出る.
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>★分類名 | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-path="★分類名/">
+
+<h1>★分類名</h1>
+<p class="lead">★この分類に含まれるものの説明.</p>
+
+<div data-children></div>
+
+<script src="../assets/nav-data.js"></script>
+<script src="../assets/site.js"></script>
+</body>
+</html>

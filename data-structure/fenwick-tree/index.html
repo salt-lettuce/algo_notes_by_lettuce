@@ -17,7 +17,6 @@
 <h2>BITについて</h2>
 <p>BITはセグメント木の一種で,通常の配列と累積和配列がもつオーダーの遅い部分を補うための木構造で,データの一点更新と区間和の計算が $O(\log N)$ で実行することができます.</p>
 
-
 <p>代表的な使い道は次のとおりです.</p>
 <ul>
 <li>値の更新がある配列の区間和</li>
@@ -29,14 +28,11 @@
 <table>
 <thead><tr><th>操作</th><th>通常の配列</th><th>累積和配列</th><th>BIT</th></tr></thead>
 <tbody>
-<tr><td>更新</td><td>O(1) → <code>A[2] = 10</code></td><td><code>O(N)</code> → 再計算</td><td>O(logN)</td></tr>
-<tr><td>区間和</td><td><code>O(N)</code> → <code>sum(A[0:3])</code></td><td>O(1) → <code>ac[3]-ac[0]</code></td><td>O(logN)</td></tr>
+<tr><td>更新</td><td>$O(1)$ → <code>A[2] = 10</code></td><td>$O(N)$ → 再計算</td><td>$O(\log N)$</td></tr>
+<tr><td>区間和</td><td>$O(N)$ → <code>sum(A[0:3])</code></td><td>$O(1)$ → <code>ac[3]-ac[0]</code></td><td>$O(\log N)$</td></tr>
 </tbody>
 </table>
 </div>
-
-
-
 
 <h3>各要素が持つ値</h3>
 <p>BITは長さ N+1 の配列1本で実装でき,木構造なのにノード用の配列を別に持たなくてよい点が特異であるといえます.<br>
@@ -106,7 +102,7 @@ print(BIT)</code></pre>
 <pre class="output"><code class="nohighlight">[1, 2, 3, 4, 5, 6, 7, 8]
 [0, 1, 3, 3, 10, 5, 11, 7, 36]</code></pre>
 
-<h3>なぜ O(log N) なのか</h3>
+<h3>なぜ $O(\log N)$ なのか</h3>
 <ul>
 <li><strong>区間和</strong>:i から <code>i &amp; -i</code> を引くと右端の1が1つ消えます.1は高々 log<sub>2</sub>N 個しかないので,ループも高々 log<sub>2</sub>N 回で終わります.</li>
 <li><strong>更新</strong>:i に <code>i &amp; -i</code> を足すと右端の1が1つ上の桁へ繰り上がり,担当区間が2倍以上に広がります.N を超えるまでに高々 log<sub>2</sub>N 回で終わります.</li>
@@ -387,7 +383,6 @@ print(BIT1)</code></pre>
             self.bit[i] += x # フェニック木のi番目にxを足して更新
             i += -i &amp; i # 最も右にある1の桁に1を足す
 
-
 A = [1, 2, 3, 4, 5, 6, 7, 8]
 N = len(A)
 
@@ -429,9 +424,9 @@ print(bit.data)</code></pre>
 <table>
 <thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
 <tbody>
-<tr><td><code>FenwickTree.add(i, x)</code></td><td>i 番目の要素に x を加算</td><td>O(logN)</td></tr>
-<tr><td><code>FenwickTree.sum(l, r)</code></td><td>区間和 [l, r) の計算</td><td>O(logN)</td></tr>
-<tr><td><code>FenwickTree.data</code></td><td>現在のBIT配列を返す</td><td>O(N)</td></tr>
+<tr><td><code>FenwickTree.add(i, x)</code></td><td>i 番目の要素に x を加算</td><td>$O(\log N)$</td></tr>
+<tr><td><code>FenwickTree.sum(l, r)</code></td><td>区間和 [l, r) の計算</td><td>$O(\log N)$</td></tr>
+<tr><td><code>FenwickTree.data</code></td><td>現在のBIT配列を返す</td><td>$O(N)$</td></tr>
 </tbody>
 </table>
 </div>
@@ -443,10 +438,10 @@ print(bit.data)</code></pre>
 <table>
 <thead><tr><th>操作</th><th>BIT</th><th><a href="../segment-tree/">セグメント木</a></th></tr></thead>
 <tbody>
-<tr><td>構築</td><td>O(N) (1つずつ <code>add</code> すると O(NlogN))</td><td>O(N)</td></tr>
-<tr><td>一点更新</td><td>O(logN)</td><td>O(logN)</td></tr>
-<tr><td>区間クエリ</td><td>O(logN)</td><td>O(logN)</td></tr>
-<tr><td>二分探索(累積和が x 以上になる位置など)</td><td>O(logN)</td><td>O(logN) (ACLの <code>max_right</code>)</td></tr>
+<tr><td>構築</td><td>$O(N)$ (1つずつ <code>add</code> すると $O(N \log N)$)</td><td>$O(N)$</td></tr>
+<tr><td>一点更新</td><td>$O(\log N)$</td><td>$O(\log N)$</td></tr>
+<tr><td>区間クエリ</td><td>$O(\log N)$</td><td>$O(\log N)$</td></tr>
+<tr><td>二分探索(累積和が x 以上になる位置など)</td><td>$O(\log N)$</td><td>$O(\log N)$ (ACLの <code>max_right</code>)</td></tr>
 <tr><td>メモリ</td><td>N+1</td><td>2N</td></tr>
 </tbody>
 </table>
@@ -456,7 +451,7 @@ print(bit.data)</code></pre>
 <ul>
 <li><strong>実装が短い</strong>:<code>sum</code> と <code>add</code> がそれぞれ数行のループで書ける.セグ木は単位元・演算・区間の左右の処理が必要で,書き間違えやすい.</li>
 <li><strong>定数倍が速い</strong>:1回のループは足し算とビット演算だけ.セグ木は <code>op</code> 関数の呼び出しが入るので,特にPythonでは差が出やすい.</li>
-<li><strong>メモリが少ない</strong>:長さ N+1 の配列1本で済む(オーダーはどちらも O(N)).</li>
+<li><strong>メモリが少ない</strong>:長さ N+1 の配列1本で済む(オーダーはどちらも $O(N)$).</li>
 <li><strong>定番の応用がそのまま書ける</strong>:転倒数の計算や,座標圧縮と組み合わせた個数の管理が短いコードで書ける.</li>
 </ul>
 

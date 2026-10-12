@@ -21,9 +21,9 @@
 <table>
 <thead><tr><th>操作</th><th>計算量</th></tr></thead>
 <tbody>
-<tr><td>Suffix Arrayの構築(SA-IS法)</td><td>O(N)</td></tr>
-<tr><td>文字列 T の検索(二分探索)</td><td>O(|T|logN)</td></tr>
-<tr><td>LCP配列の構築(ACLの <code>lcp_array</code>)</td><td>O(N)</td></tr>
+<tr><td>Suffix Arrayの構築(SA-IS法)</td><td>$O(N)$</td></tr>
+<tr><td>文字列 T の検索(二分探索)</td><td>$O(|T|\log N)$</td></tr>
+<tr><td>LCP配列の構築(ACLの <code>lcp_array</code>)</td><td>$O(N)$</td></tr>
 </tbody>
 </table>
 </div>
@@ -85,6 +85,17 @@ uffixArray
 xArray
 y</code></pre>
 
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>suffix_array(s)</code></td><td>文字列 s のSuffix Arrayを返す</td><td>$O(N)$</td></tr>
+<tr><td><code>lcp_array(s, sa)</code></td><td>辞書順で隣り合う接尾辞どうしの最長共通接頭辞の長さ(長さ N-1)を返す</td><td>$O(N)$</td></tr>
+</tbody>
+</table>
+</div>
+
 <h2>使い方</h2>
 <p>SuffixArrayからソートされた任意の長さの部分文字列を復元し,二分探索などに利用できます.$O(|S|N)$</p>
 
@@ -100,8 +111,8 @@ print(S_sorted)</code></pre>
 <pre class="output"><code class="nohighlight">['Ar', 'Su', 'ay', 'ff', 'fi', 'ix', 'ra', 'rr', 'uf', 'xA', 'y']</code></pre>
 
 <h2>SA-IS法のしくみ</h2>
-<p>接尾辞をそのままソートすると,文字列どうしの比較1回に最大 O(N) かかるので全体で O(N<sup>2</sup>logN) になってしまいます.<br>
-SA-IS法は,<strong>「一部の接尾辞(LMS)の順番さえ分かれば,残りは決まった順に流し込むだけで全体の順番が決まる」</strong>という性質(誘導ソート)を使って,O(N) でSuffix Arrayを作ります.<br>
+<p>接尾辞をそのままソートすると,文字列どうしの比較1回に最大 $O(N)$ かかるので全体で $O(N^2 \log N)$ になってしまいます.<br>
+SA-IS法は,<strong>「一部の接尾辞(LMS)の順番さえ分かれば,残りは決まった順に流し込むだけで全体の順番が決まる」</strong>という性質(誘導ソート)を使って,$O(N)$ でSuffix Arrayを作ります.<br>
 ACLの <code>suffix_array</code> も,ある程度長い文字列では内部でSA-IS法を使っています.</p>
 <p>ここでは S = <code>banana</code> を例にします.末尾に,どの文字よりも小さい特別な文字(番兵) <code>$</code> を付けて <code>banana$</code> として考えます.</p>
 
@@ -181,8 +192,6 @@ ACLの <code>suffix_array</code> も,ある程度長い文字列では内部でS
 <li><strong>同じ LMS部分文字列がある場合</strong>:LMS部分文字列に小さい順で番号を付け,その番号を並べた短い文字列を作ります.その文字列のSuffix Arrayを<strong>再帰的に</strong>SA-IS法で求めると,LMS の正しい順番が分かります.</li>
 </ul>
 <p>最後に,求めた LMS の順番を使って手順4の誘導ソートをもう一度行えば完成です.</p>
-
-
 
 <script src="../../assets/nav-data.js"></script>
 <script src="../../assets/site.js"></script>
