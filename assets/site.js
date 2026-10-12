@@ -207,7 +207,10 @@
   // ---- 数式 ----
   window.MathJax = {
     tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]] },
-    options: { skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"] }
+    options: {
+      skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"],
+      ignoreHtmlClass: "mathjax_ignore|diagram"  // 図の中の $ (番兵など)を数式扱いしない
+    }
   };
   if (/\$|\\\(/.test(main.textContent)) {
     document.head.appendChild(el("script", {

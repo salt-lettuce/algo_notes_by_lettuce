@@ -1,9 +1,14 @@
-// 木構造の図(セグメント木・BIT)を SVG で描画し,ステップごとに切り替える.
+// 木構造(セグメント木・BIT)や配列の図を SVG で描画し,ステップごとに切り替える.
 // 使い方:
 //   <figure class="diagram" data-diagram>
 //   <script type="application/json">{ "type": "segtree", "n": 8, "values": [...], "steps": [...] }</script>
 //   </figure>
-// values: ノード番号をインデックスにした値の配列(0番目は未使用)
+// type  : "segtree" / "bit" / "array"
+//   array のときは headers(各セルの見出し.同じ見出しが続くとグループとして少し離す)と
+//   indexRow(true か "SA[{}]" のような書式.セルの上に添字を書く)が使える
+// rows  : セルの上(添字の下)に書く固定のラベルの行の配列.各行はセルごとの 文字列 か [文字列, クラス名]
+//         (例: [["$", "a$"], [["S型", "lms"], "L型"]])
+// values: ノード番号をインデックスにした値の配列(segtree・bit は0番目が未使用,array は0始まり)
 // steps : [{ "text": "説明(HTML可)", "hl": { "cur": [1], "use": [2] }, "set": { "9": 2 }, "marks": { "L": 10, "R": 15 } }]
 //   hl    … ノードの強調.cur=注目中, use=答えに使った, upd=更新した, ref=参照した, rng=対象の区間
 //   set   … ノードの値を書き換える(以降のステップにも引き継がれる)
@@ -43,6 +48,13 @@
         var lb = k & -k;
         nodes.push({ id: k, l: k - lb, r: k, level: log2(n) - log2(lb) });
       }
+    } else if (cfg.type === "array") {
+      // headers が同じ値のセルを1つのグループ(バケツ)として少し離して並べる
+      var group = 0;
+      for (k = 0; k < n; k++) {
+        if (k > 0 && cfg.headers && cfg.headers[k] !== cfg.headers[k - 1]) group++;
+        nodes.push({ id: k, l: k, r: k + 1, level: 0, group: group });
+      }
     }
     return nodes;
   }
@@ -52,22 +64,41 @@
     var nodes = layout(cfg);
     var levels = 0;
     nodes.forEach(function (nd) { levels = Math.max(levels, nd.level + 1); });
-    var W = cfg.n * U + PAD * 2;
-    var H = levels * (HH + BH) + (levels - 1) * VGAP + PAD * 2;
+    var groups = 0;
+    nodes.forEach(function (nd) { groups = Math.max(groups, nd.group || 0); });
+    var GGAP = 14;  // バケツの間隔
+    var IDXH = cfg.indexRow ? 18 : 0;  // セルの上に添字を書く余白
+    var ROWH = 16;                     // ラベル1行の高さ
+    var rows = cfg.rows || [];
+    var TOP = IDXH + rows.length * ROWH;
+    var W = cfg.n * U + groups * GGAP + PAD * 2;
+    var bh = BH;
+    var H = TOP + levels * (HH + bh) + (levels - 1) * VGAP + PAD * 2;
     var steps = cfg.steps && cfg.steps.length ? cfg.steps : [{}];
 
     var root = svg("svg", { viewBox: "0 0 " + W + " " + H, role: "img" });
     var byId = {};
     nodes.forEach(function (nd) {
-      var x = PAD + nd.l * U + HGAP / 2;
-      var y = PAD + nd.level * (HH + BH + VGAP);
+      var x = PAD + nd.l * U + (nd.group || 0) * GGAP + HGAP / 2;
+      var y = PAD + TOP + nd.level * (HH + bh + VGAP);
       var w = (nd.r - nd.l) * U - HGAP;
+      if (cfg.indexRow) {
+        svg("text", { class: "pos", x: x + w / 2, y: PAD + IDXH / 2 }, root).textContent =
+          cfg.indexRow === true ? nd.id : cfg.indexRow.replace("{}", nd.id);
+      }
       var g = svg("g", { class: "node" }, root);
-      svg("rect", { class: "bd", x: x, y: y, width: w, height: HH + BH, rx: 4 }, g);
+      svg("rect", { class: "bd", x: x, y: y, width: w, height: HH + bh, rx: 4 }, g);
       svg("rect", { class: "hd", x: x, y: y, width: w, height: HH, rx: 4 }, g);
       var idx = svg("text", { class: "idx", x: x + w / 2, y: y + HH / 2 }, g);
-      idx.textContent = nd.id;
-      var val = svg("text", { class: "val", x: x + w / 2, y: y + HH + BH / 2 }, g);
+      idx.textContent = cfg.headers ? cfg.headers[nd.id] : nd.id;
+      var val = svg("text", { class: "val", x: x + w / 2, y: y + HH + bh / 2 }, g);
+      rows.forEach(function (row, r) {
+        var c = row[nd.id];
+        if (c === undefined || c === null) return;
+        if (typeof c === "string") c = [c];
+        svg("text", { class: "tag" + (c[1] ? " " + c[1] : ""), x: x + w / 2, y: PAD + IDXH + r * ROWH + ROWH / 2 - 1 }, root)
+          .textContent = c[0];
+      });
       var marks = svg("g", {}, g);
       byId[nd.id] = { g: g, val: val, marks: marks, x: x, y: y, w: w };
     });
@@ -124,7 +155,8 @@
           if (st.hl && st.hl[kind] && st.hl[kind].indexOf(nd.id) !== -1) cls.push(kind);
         });
         o.g.setAttribute("class", cls.join(" "));
-        o.val.textContent = values[nd.id] === undefined || values[nd.id] === null ? "" : values[nd.id];
+        var v = values[nd.id];
+        o.val.textContent = v === undefined || v === null ? "" : v;
         while (o.marks.firstChild) o.marks.removeChild(o.marks.firstChild);
       });
       var placed = {};

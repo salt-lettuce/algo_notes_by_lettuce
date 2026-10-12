@@ -176,6 +176,10 @@ figcaption { font-size: 0.85rem; color: var(--fg-muted); }
 .diagram text { text-anchor: middle; dominant-baseline: central; fill: var(--fg); font-family: "JetBrains Mono", ui-monospace, monospace; }
 .diagram .idx { font-size: 12px; }
 .diagram .val { font-size: 17px; }
+.diagram .pos { font-size: 11px; fill: var(--fg-muted); }
+.diagram .tag { font-size: 11px; fill: var(--fg-muted); font-family: "Noto Sans JP", system-ui, sans-serif; }
+.diagram .tag.lms { fill: var(--dg-cur); font-weight: 700; }
+.diagram .tag.suf { font-family: "JetBrains Mono", ui-monospace, monospace; fill: var(--fg); }
 .diagram .hd { fill: var(--accent-soft); stroke: var(--dg-line); }
 .diagram .bd { fill: var(--bg); stroke: var(--dg-line); }
 .diagram .node.rng .bd { fill: var(--dg-rng); }

@@ -98,6 +98,91 @@ for i in sa:
 print(S_sorted)</code></pre>
 <pre class="output"><code class="nohighlight">['Ar', 'Su', 'ay', 'ff', 'fi', 'ix', 'ra', 'rr', 'uf', 'xA', 'y']</code></pre>
 
+<h2>SA-IS法のしくみ</h2>
+<p>接尾辞をそのままソートすると,文字列どうしの比較1回に最大 O(N) かかるので全体で O(N<sup>2</sup>logN) になってしまいます.<br>
+SA-IS法は,<strong>「一部の接尾辞(LMS)の順番さえ分かれば,残りは決まった順に流し込むだけで全体の順番が決まる」</strong>という性質(誘導ソート)を使って,O(N) でSuffix Arrayを作ります.<br>
+ACLの <code>suffix_array</code> も,ある程度長い文字列では内部でSA-IS法を使っています.</p>
+<p>ここでは S = <code>banana</code> を例にします.末尾に,どの文字よりも小さい特別な文字(番兵) <code>$</code> を付けて <code>banana$</code> として考えます.</p>
+
+<h3>手順1:接尾辞を S型 と L型 に分ける</h3>
+<p>接尾辞 i が,1つ右の接尾辞 i+1 より</p>
+<ul>
+<li>小さいとき <strong>S型</strong>(Smaller)</li>
+<li>大きいとき <strong>L型</strong>(Larger)</li>
+</ul>
+<p>とします.これは文字列を比較しなくても,右から1文字ずつ見るだけで決められます.</p>
+<ul>
+<li>番兵 <code>$</code> は S型</li>
+<li>S[i] &lt; S[i+1] なら S型,S[i] &gt; S[i+1] なら L型</li>
+<li>S[i] = S[i+1] なら,i+1 と同じ型</li>
+</ul>
+<p>例えば i = 4 は n &gt; a なので L型,i = 3 は a &lt; n なので S型です.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>i</th><th>文字</th><th>接尾辞</th><th>型</th><th>LMS</th></tr></thead>
+<tbody>
+<tr><td>0</td><td><code>b</code></td><td><code>banana$</code></td><td>L</td><td></td></tr>
+<tr><td>1</td><td><code>a</code></td><td><code>anana$</code></td><td>S</td><td>○</td></tr>
+<tr><td>2</td><td><code>n</code></td><td><code>nana$</code></td><td>L</td><td></td></tr>
+<tr><td>3</td><td><code>a</code></td><td><code>ana$</code></td><td>S</td><td>○</td></tr>
+<tr><td>4</td><td><code>n</code></td><td><code>na$</code></td><td>L</td><td></td></tr>
+<tr><td>5</td><td><code>a</code></td><td><code>a$</code></td><td>L</td><td></td></tr>
+<tr><td>6</td><td><code>$</code></td><td><code>$</code></td><td>S</td><td>○</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>手順2:LMS を見つける</h3>
+<p>S型のうち,<strong>左隣が L型</strong>のものを LMS(Left-Most S)と呼びます.<br>
+文字の大小を山と谷に見立てると,LMS は「下り坂のあとの谷の底」にあたる位置です.<br>
+<code>banana$</code> では 1,3,6 が LMS です(上の表の ○).LMS は隣り合わないので,多くても N/2 個しかありません.</p>
+
+<h3>手順3:バケツに分ける</h3>
+<p>Suffix Arrayでは,同じ文字で始まる接尾辞は必ずひとかたまりに並びます.<br>
+そこで SA を先頭の文字ごとの区画(バケツ)に分けておきます.<code>banana$</code> なら <code>$</code> が1個,a が3個,b が1個,n が2個です.</p>
+<p>さらに,<strong>同じバケツの中では L型が前,S型が後ろ</strong>に並びます.<br>
+例えば a のバケツでは,L型の <code>a$</code> は a のあとに a より小さい文字が来て,S型の <code>ana$</code> は a より大きい文字が来るので,L型の方が必ず小さくなります.</p>
+
+<h3>手順4:誘導ソート</h3>
+<p>LMS の正しい順番が分かっているとすると,次の2回の走査だけで全体の順番が決まります.</p>
+<ol>
+<li>LMS を正しい順番で,それぞれのバケツの<strong>末尾</strong>に置く</li>
+<li>SA を<strong>左から</strong>見て,入っている値 i の1つ前 i−1 が L型なら,i−1 をそのバケツの<strong>先頭</strong>から詰めて入れる</li>
+<li>SA を<strong>右から</strong>見て,入っている値 i の1つ前 i−1 が S型なら,i−1 をそのバケツの<strong>末尾</strong>から詰めて入れる</li>
+</ol>
+<p>クリックで1段階ずつ確認できます.各マスの上には,添字の下に<strong>最終的にそこに入る接尾辞</strong>と,その型(L型・S型)・LMS かどうかを書いています.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{"type": "array", "n": 7, "headers": ["$", "a", "a", "a", "b", "n", "n"], "indexRow": "SA[{}]", "rows": [[["$", "suf"], ["a$", "suf"], ["ana$", "suf"], ["anana$", "suf"], ["banana$", "suf"], ["na$", "suf"], ["nana$", "suf"]], [["S型・LMS", "lms"], ["L型"], ["S型・LMS", "lms"], ["S型・LMS", "lms"], ["L型"], ["L型"], ["L型"]]], "values": [null, null, null, null, null, null, null], "legend": [["cur", "注目中"], ["upd", "いま入れた要素"], ["use", "正しい位置が決まった要素"]], "steps": [{"text": "SA を先頭の文字ごとのバケツに区切る.<code>$</code> が1個,a が3個,b が1個,n が2個なので,左から <code>$</code> | a a a | b | n n となる."}, {"text": "LMS(6,3,1)を正しい順(6 → 3 → 1)で,それぞれのバケツの<strong>末尾</strong>に詰めて置く.a のバケツには 3,1 の順に入る.", "hl": {"upd": [0, 2, 3]}, "set": {"0": 6, "2": 3, "3": 1}}, {"text": "<strong>L型を入れる</strong>:SA を左から見ていく.<br>SA[0] = 6 の1つ前の 5 は L型で文字は a なので,a のバケツの<strong>先頭</strong>(SA[1])に 5 を入れる.", "hl": {"cur": [0], "upd": [1]}, "set": {"1": 5}}, {"text": "SA[1] = 5 の1つ前の 4 は L型で文字は n なので,n のバケツの先頭(SA[5])に 4 を入れる.", "hl": {"cur": [1], "upd": [5]}, "set": {"5": 4}}, {"text": "SA[2] = 3 の1つ前の 2 は L型で文字は n なので,n のバケツの次の空き(SA[6])に 2 を入れる.", "hl": {"cur": [2], "upd": [6]}, "set": {"6": 2}}, {"text": "SA[3] = 1 の1つ前の 0 は L型で文字は b なので,b のバケツ(SA[4])に 0 を入れる.", "hl": {"cur": [3], "upd": [4]}, "set": {"4": 0}}, {"text": "SA[4] = 0 は1つ前が無い.SA[5] = 4,SA[6] = 2 は1つ前(3,1)が S型なので,ここでは何もしない.<br>これで L型の接尾辞(5,4,2,0)がすべて正しい位置に入った.", "hl": {"use": [1, 4, 5, 6]}}, {"text": "<strong>S型を入れる</strong>:S型は後ろから入れ直すので,番兵以外の S型の場所をいったん空にする.", "hl": {"use": [1, 4, 5, 6]}, "set": {"2": null, "3": null}}, {"text": "SA を右から見ていく.<br>SA[6] = 2 の1つ前の 1 は S型で文字は a なので,a のバケツの<strong>末尾</strong>(SA[3])に 1 を入れる.", "hl": {"cur": [6], "upd": [3], "use": [1, 4, 5, 6]}, "set": {"3": 1}}, {"text": "SA[5] = 4 の1つ前の 3 は S型で文字は a なので,a のバケツの次の末尾(SA[2])に 3 を入れる.", "hl": {"cur": [5], "upd": [2], "use": [1, 3, 4, 5, 6]}, "set": {"2": 3}}, {"text": "残りの SA[4]〜SA[0] は,1つ前が無いか L型なので何もしない.<br>完成:SA = [6, 5, 3, 1, 0, 4, 2].番兵の 6 を除くと [5, 3, 1, 0, 4, 2] で,ACLの結果と一致する.", "hl": {"use": [0, 1, 2, 3, 4, 5, 6]}}]}
+</script>
+</figure>
+
+<p>この方法で正しく並ぶのは,接尾辞 i−1 が「文字 S[i−1] + 接尾辞 i」だからです.<br>
+同じバケツ(同じ先頭文字)の L型どうしの順番は,後ろに続く接尾辞 i の順番で決まります.<br>
+左から走査すると接尾辞 i は小さい順に出てくるので,出てきた順にバケツの先頭から詰めるだけで正しい順になります.<br>
+また,L型なら 接尾辞 i &lt; 接尾辞 i−1 なので,i−1 を入れるより前に必ず i が SA に入っています.S型の走査はこれを右からにしたものです.</p>
+
+<h3>手順5:LMS の正しい順番を求める</h3>
+<p>手順4では「LMS の正しい順番」を使いましたが,これはどう求めればよいでしょうか.</p>
+<p>実は,LMS を<strong>適当な順番</strong>で置いて同じ誘導ソートをしても,LMS どうしは「LMS部分文字列」(ある LMS から次の LMS までの部分)の順には正しく並びます.<br>
+<code>banana$</code> の LMS部分文字列は,1 → <code>ana</code>,3 → <code>ana$</code>,6 → <code>$</code> です.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{"type": "array", "n": 7, "headers": ["$", "a", "a", "a", "b", "n", "n"], "indexRow": "SA[{}]", "values": [null, null, null, null, null, null, null], "legend": [["upd", "入れた・動いた要素"]], "steps": [{"text": "LMS の順番が分からないので,わざと逆の順(1 → 3)で a のバケツの末尾に置いてみる.", "hl": {"upd": [0, 2, 3]}, "set": {"0": 6, "2": 1, "3": 3}}, {"text": "手順4と同じように左から走査して L型を入れる.SA = [6, 5, 1, 3, 0, 4, 2]", "hl": {"upd": [1, 4, 5, 6]}, "set": {"1": 5, "4": 0, "5": 4, "6": 2}}, {"text": "S型の場所を空にしてから,右から走査して S型を入れる.", "set": {"2": null, "3": null}}, {"text": "SA = [6, 5, 3, 1, 0, 4, 2] となり,LMS の 3 と 1 が正しい順(3 → 1)に入れ替わった.", "hl": {"upd": [2, 3]}, "set": {"2": 3, "3": 1}}]}
+</script>
+</figure>
+
+<ul>
+<li><strong>LMS部分文字列がすべて異なる場合</strong>:その順番がそのまま LMS の正しい順番になります.<code>banana$</code> はこちらで,6 → 3 → 1 と決まります.</li>
+<li><strong>同じ LMS部分文字列がある場合</strong>:LMS部分文字列に小さい順で番号を付け,その番号を並べた短い文字列を作ります.その文字列のSuffix Arrayを<strong>再帰的に</strong>SA-IS法で求めると,LMS の正しい順番が分かります.</li>
+</ul>
+<p>最後に,求めた LMS の順番を使って手順4の誘導ソートをもう一度行えば完成です.</p>
+
+
+
 <script src="../../assets/nav-data.js"></script>
 <script src="../../assets/site.js"></script>
 </body>
