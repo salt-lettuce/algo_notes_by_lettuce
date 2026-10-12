@@ -157,6 +157,41 @@
     applyTheme(next);
   });
 
+  // ---- コピーボタン(出力欄以外のコード) ----
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function (resolve, reject) {
+      var ta = el("textarea", { readonly: "", style: "position:fixed;top:-1000px" });
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { /* 失敗扱い */ }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject();
+    });
+  }
+  Array.prototype.forEach.call(main.querySelectorAll("pre:not(.output) > code"), function (code) {
+    var pre = code.parentNode;
+    var btn = el("button", { type: "button", class: "copy-btn", "aria-label": "コードをコピー", text: "copy" });
+    var timer;
+    btn.addEventListener("click", function () {
+      copyText(code.textContent).then(function () {
+        btn.textContent = "copied!";
+        btn.classList.add("done");
+      }, function () {
+        btn.textContent = "failed";
+      });
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        btn.textContent = "copy";
+        btn.classList.remove("done");
+      }, 1500);
+    });
+    pre.classList.add("has-copy");
+    pre.appendChild(btn);
+  });
+
   // ---- コードの色付け ----
   if (document.querySelector("pre code")) {
     var hl = el("script", { src: HLJS + "highlight.min.js" });

@@ -14,7 +14,15 @@
 <p>参考：<a href="https://qiita.com/iorn121/items/d3c24c4d4b014531b782">Qiita</a></p>
 
 <h2>BITについて</h2>
-<p>BITはセグメント木の一種で,通常の配列と累積和配列がもつオーダーの遅い部分を補うための木構造で,更新も区間和の計算も $O(\log N)$ で実行することができます.</p>
+<p>BITはセグメント木の一種で,通常の配列と累積和配列がもつオーダーの遅い部分を補うための木構造で,データの一点更新と区間和の計算が $O(\log N)$ で実行することができます.</p>
+
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>値の更新がある配列の区間和</li>
+<li>転倒数(反転数)の計算:左から順に「自分より大きい値がすでにいくつ出たか」を数える</li>
+<li>座標圧縮と組み合わせた「x 以下の値がいくつあるか」の管理</li>
+</ul>
 
 <div class="table-wrap">
 <table>
@@ -26,25 +34,13 @@
 </table>
 </div>
 
-<p>長さNの配列で実装できる点が特異であるといえます.</p>
 
-<pre><code class="language-python">A = list(range(1,9))
-print(A)
 
-BIT = [0]*(8+1)
 
-BIT[1]=1 # Aの 1番目の値
-BIT[2]=1+2 # Aの 1,2番目の和
-BIT[3]=3 # Aの 3番目の数
-BIT[4]=1+2+3+4 # Aの 1,2,3,4番目の和
-BIT[5]=5 # Aの 5番目の数
-BIT[6]=5+6 # Aの 5,6番目の和
-BIT[7]=7 # Aの 7番目の和
-BIT[8]=1+2+3+4+5+6+7+8 # Aの 1,2,3,4,5,6,7,8番目の和
-
-print(BIT)</code></pre>
-<pre class="output"><code class="nohighlight">[1, 2, 3, 4, 5, 6, 7, 8]
-[0, 1, 3, 3, 10, 5, 11, 7, 36]</code></pre>
+<h3>各要素が持つ値</h3>
+<p>BITは長さ N+1 の配列1本で実装でき,木構造なのにノード用の配列を別に持たなくてよい点が特異であるといえます.<br>
+インデックスは <strong>1-indexed</strong> で,BIT[0] は使いません(常に 0).<br>
+BIT[i] には,A の i 番目を右端とするある長さの区間の和が入っています.</p>
 
 <figure class="diagram" data-diagram>
 <script type="application/json">
@@ -66,6 +62,61 @@ print(BIT)</code></pre>
 </script>
 <figcaption>A = [1, 2, ..., 8] のときのBIT.上の帯が BIT のインデックス,下の欄がその要素が持つ値(担当区間の和)</figcaption>
 </figure>
+
+<p>担当する区間の長さは,i を2進数で表したときの<strong>一番右の1の桁</strong>(最下位ビット)で決まります.<br>
+この値は <code>i &amp; -i</code> で求められ,BIT[i] は A の (i − (i &amp; -i), i] 番目の和を持ちます.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>i</th><th>2進数</th><th><code>i &amp; -i</code>(区間の長さ)</th><th>担当区間</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0001</td><td>1</td><td>1</td></tr>
+<tr><td>2</td><td>0010</td><td>2</td><td>1〜2</td></tr>
+<tr><td>3</td><td>0011</td><td>1</td><td>3</td></tr>
+<tr><td>4</td><td>0100</td><td>4</td><td>1〜4</td></tr>
+<tr><td>5</td><td>0101</td><td>1</td><td>5</td></tr>
+<tr><td>6</td><td>0110</td><td>2</td><td>5〜6</td></tr>
+<tr><td>7</td><td>0111</td><td>1</td><td>7</td></tr>
+<tr><td>8</td><td>1000</td><td>8</td><td>1〜8</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Pythonの整数は2の補数として扱われるので,<code>-i</code> は「i のビットを反転して1を足したもの」になります.<br>
+例えば i = 6 = 0110<sub>(2)</sub> のとき,-i は …1010<sub>(2)</sub> なので,<code>6 &amp; -6</code> = 0010<sub>(2)</sub> = 2 です.</p>
+
+<p>A = [1, 2, ..., 8] について,この表のとおりに値を入れるとBITは次のようになります.</p>
+
+<pre><code class="language-python">A = list(range(1,9))
+print(A)
+
+BIT = [0]*(8+1)
+
+BIT[1]=1 # Aの 1番目の値
+BIT[2]=1+2 # Aの 1,2番目の和
+BIT[3]=3 # Aの 3番目の数
+BIT[4]=1+2+3+4 # Aの 1,2,3,4番目の和
+BIT[5]=5 # Aの 5番目の数
+BIT[6]=5+6 # Aの 5,6番目の和
+BIT[7]=7 # Aの 7番目の和
+BIT[8]=1+2+3+4+5+6+7+8 # Aの 1,2,3,4,5,6,7,8番目の和
+
+print(BIT)</code></pre>
+<pre class="output"><code class="nohighlight">[1, 2, 3, 4, 5, 6, 7, 8]
+[0, 1, 3, 3, 10, 5, 11, 7, 36]</code></pre>
+
+<h3>なぜ O(log N) なのか</h3>
+<ul>
+<li><strong>区間和</strong>:i から <code>i &amp; -i</code> を引くと右端の1が1つ消えます.1は高々 log<sub>2</sub>N 個しかないので,ループも高々 log<sub>2</sub>N 回で終わります.</li>
+<li><strong>更新</strong>:i に <code>i &amp; -i</code> を足すと右端の1が1つ上の桁へ繰り上がり,担当区間が2倍以上に広がります.N を超えるまでに高々 log<sub>2</sub>N 回で終わります.</li>
+</ul>
+<p>どちらも,具体的な動きは下の「区間和の計算」「値の更新」の図で1段階ずつ確認できます.</p>
+
+<h3>注意点</h3>
+<ul>
+<li>BITで直接求められるのは「1〜i 番目の和」(累積和)です.区間 [l, r] の和は「1〜r の和 − 1〜(l−1) の和」と<strong>引き算</strong>で求めるので,和やxorのように逆の操作ができる演算でしか区間クエリは使えません.区間最小値 や 区間最大値 には<a href="../segment-tree/">セグメント木</a>を使います.</li>
+<li>このページの自作実装は1-indexedですが,ACLの <code>FenwickTree</code> は0-indexedです.</li>
+</ul>
 
 <h2>区間和の計算</h2>
 <p>A[3]〜A[7]の和を求めるには,通常と同じように,(A[0]〜A[7]の和) − (A[0]〜A[2]の和) を計算します.<br>
@@ -312,7 +363,8 @@ print(BIT1)</code></pre>
 <p>要素の更新のオーダーも高々 $O(\log N)$ であることがわかります.</p>
 
 <h2>クラスでの実装</h2>
-<p>クラスを用いると以下のように実装することができます.</p>
+<p>クラスを用いると以下のように実装することができます.<br>
+後半では A = [1, 2, ..., 8] からBITを作り,前例と同じ区間和と更新を行っています.</p>
 
 <pre><code class="language-python">class BIT:
     # 長さN+1の配列を初期化
@@ -332,21 +384,43 @@ print(BIT1)</code></pre>
     def add(self, i, x):
         while i &lt;= self.size: # iがNを超えないように制限
             self.bit[i] += x # フェニック木のi番目にxを足して更新
-            i += -i &amp; i # 最も右にある1の桁に1を足す</code></pre>
+            i += -i &amp; i # 最も右にある1の桁に1を足す
+
+
+A = [1, 2, 3, 4, 5, 6, 7, 8]
+N = len(A)
+
+bit = BIT(N)
+for i in range(N):
+    bit.add(i+1, A[i]) # 1-indexedなので i+1 番目に A[i] を足す
+print(bit.bit)
+
+print(bit.sum(7) - bit.sum(2)) # 3~7番目の和
+bit.add(5, 6) # 5番目に6を足す
+print(bit.bit)</code></pre>
+<pre class="output"><code class="nohighlight">[0, 1, 3, 3, 10, 5, 11, 7, 36]
+25
+[0, 1, 3, 3, 10, 11, 17, 7, 42]</code></pre>
 
 <h2>ライブラリでの実装</h2>
 <p>AtCoder Library (ACL) にはBITのライブラリが存在します.<br>
 こちらは0-indexedで設計されているため,<code>bit[0]</code> から値を入れる必要があることに注意してください.</p>
 
 <pre><code class="language-python">from atcoder.fenwicktree import FenwickTree
-N = 8
+
+A = [1, 2, 3, 4, 5, 6, 7, 8]
+N = len(A)
+
 bit = FenwickTree(N)
 for i in range(N):
-    bit.add(i,i+1)
-print(bit.sum(2,6+1)) # 前例の3~7
-bit.add(4,6) # 前例の5番目に6を足す操作
+    bit.add(i, A[i]) # 0-indexedなので i 番目に A[i] を足す
+print(bit.data)
+
+print(bit.sum(2, 7)) # 区間 [2, 7) の和 (前例の3~7番目)
+bit.add(4, 6) # 前例の5番目に6を足す操作
 print(bit.data)</code></pre>
-<pre class="output"><code class="nohighlight">25
+<pre class="output"><code class="nohighlight">[1, 3, 3, 10, 5, 11, 7, 36]
+25
 [1, 3, 3, 10, 11, 17, 7, 42]</code></pre>
 
 <h3>操作一覧</h3>

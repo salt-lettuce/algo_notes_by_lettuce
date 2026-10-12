@@ -391,6 +391,65 @@ print(st.all_prod()) # 配列全体の取得</code></pre>
 <p>prod は代数学における結合法則が成り立つ二項演算 ($a \circ b$) の結果を広く呼ぶ「積」(product) から来ています.<br>
 掛け算の積ではないです.</p>
 
+<h3>単位元について</h3>
+<p>単位元 e は,演算 op について「どんな x と組み合わせても x を変えない値」です.<br>
+つまり,すべての x について op(e, x) = op(x, e) = x が成り立つ値を指定します.<br>
+例えば min なら,どんな値と min をとっても相手がそのまま残る inf が単位元になります.</p>
+<p>ACLのセグ木では,単位元は次のような場面で使われます.</p>
+<ul>
+<li><strong>計算の初期値</strong>:区間クエリでは,答えを e で初期化してから区間内のノードを順に op で合わせていきます.上の「区間クエリの計算」で ans = inf から始めたのと同じです.</li>
+<li><strong>空の区間の答え</strong>:<code>prod(l, l)</code> のように区間が空のときは e が返ります.</li>
+<li><strong>配列の穴埋め</strong>:内部では配列の長さを2のべき乗に揃えるため,足りない部分の葉を e で埋めます.</li>
+</ul>
+<p>単位元を間違えると答えが壊れます.例えば min なのに e = 0 にすると,初期値の 0 がどの値よりも小さいので,どの区間でも答えが 0 になってしまいます.</p>
+
+<pre><code class="language-python">st = SegTree(min, 0, [3,1,4,1,5,9,2,6]) # 単位元を間違えた例
+print(st.prod(2, 7)) # 本当の答えは 1</code></pre>
+<pre class="output"><code class="nohighlight">0</code></pre>
+
+<h3>演算関数の例</h3>
+<p>op は<strong>結合法則</strong> op(op(a, b), c) = op(a, op(b, c)) が成り立つ演算なら何でも使えます.<br>
+交換法則(op(a, b) = op(b, a))は必要ないので,文字列の連結のように順番に意味がある演算も扱えます.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>求めたいもの</th><th>op</th><th>単位元 e</th></tr></thead>
+<tbody>
+<tr><td>区間の最小値</td><td><code>min(x, y)</code></td><td><code>float('inf')</code></td></tr>
+<tr><td>区間の最大値</td><td><code>max(x, y)</code></td><td><code>-float('inf')</code></td></tr>
+<tr><td>区間の和</td><td><code>x + y</code></td><td><code>0</code></td></tr>
+<tr><td>区間の積(mod付き)</td><td><code>x * y % MOD</code></td><td><code>1</code></td></tr>
+<tr><td>区間のxor</td><td><code>x ^ y</code></td><td><code>0</code></td></tr>
+<tr><td>区間のor</td><td><code>x | y</code></td><td><code>0</code></td></tr>
+<tr><td>区間のand</td><td><code>x &amp; y</code></td><td><code>-1</code>(全ビットが1)</td></tr>
+<tr><td>区間のgcd</td><td><code>math.gcd(x, y)</code></td><td><code>0</code>(gcd(0, x) = x)</td></tr>
+<tr><td>区間の最小値とその位置</td><td><code>min(x, y)</code>(要素を (値, 添字) のタプルにする)</td><td><code>(float('inf'), -1)</code></td></tr>
+<tr><td>文字列の連結</td><td><code>x + y</code>(要素を文字列にする)</td><td><code>""</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>op と e を差し替えるだけで,同じ配列に対していろいろな区間クエリができます.</p>
+
+<pre><code class="language-python">from atcoder.segtree import SegTree
+from math import gcd
+
+a = [3,1,4,1,5,9,2,6]
+
+st_sum = SegTree(lambda x, y: x + y, 0, a) # 和
+st_max = SegTree(max, -float('inf'), a)    # 最大値
+st_gcd = SegTree(gcd, 0, a)                # gcd
+st_pos = SegTree(min, (float('inf'), -1), [(v, i) for i, v in enumerate(a)]) # 最小値とその位置
+
+print(st_sum.prod(2, 7)) # 4+1+5+9+2
+print(st_max.prod(2, 7))
+print(st_gcd.prod(2, 7))
+print(st_pos.prod(2, 7)) # (最小値, その添字)</code></pre>
+<pre class="output"><code class="nohighlight">21
+9
+1
+(1, 3)</code></pre>
+
 <script src="../../assets/nav-data.js"></script>
 <script src="../../assets/site.js"></script>
 </body>

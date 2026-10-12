@@ -29,13 +29,23 @@
 </div>
 
 <h2>SortedList</h2>
+<p>重複を許すソート済みのリストです(C++の <code>multiset</code> に近い).<br>
+インデックスで k 番目の値を取り出せるのと,<code>bisect_left</code> / <code>bisect_right</code> で「x 以上で最小の値」などを探せるのが便利な点です.</p>
 
 <pre><code class="language-python">from sortedcontainers import SortedList
 
-sl = SortedList()
-sl.add(3)
+sl = SortedList([5, 1, 3])
+sl.add(3)              # 重複してもOK
+print(sl)              # 常にソートされている
+print(sl[0], sl[-1])   # 最小値と最大値
+i = sl.bisect_left(4)  # 4 以上で最小の値の位置
+print(sl[i])
+sl.remove(3)           # 3 を1つだけ削除
 print(sl)</code></pre>
-<pre class="output"><code class="nohighlight">SortedList([3])</code></pre>
+<pre class="output"><code class="nohighlight">SortedList([1, 3, 3, 5])
+1 5
+5
+SortedList([1, 3, 5])</code></pre>
 
 <h3>操作一覧</h3>
 <div class="table-wrap">
@@ -59,6 +69,24 @@ print(sl)</code></pre>
 </div>
 
 <h2>SortedSet</h2>
+<p>重複を許さないソート済みの集合です(C++の <code>set</code> に近い).<br>
+普通の <code>set</code> と同じように使えて,さらに順番どおりに取り出したり二分探索したりできます.</p>
+
+<pre><code class="language-python">from sortedcontainers import SortedSet
+
+ss = SortedSet([5, 1, 3, 3])  # 重複は1つにまとまる
+ss.add(2)
+print(ss)
+print(3 in ss)                # 含まれているか
+i = ss.bisect_right(3)        # 3 より大きい最小の値の位置
+print(ss[i])
+ss.discard(1)                 # 削除
+print(ss)</code></pre>
+<pre class="output"><code class="nohighlight">SortedSet([1, 2, 3, 5])
+True
+5
+SortedSet([2, 3, 5])</code></pre>
+
 <h3>操作一覧</h3>
 <div class="table-wrap">
 <table>
@@ -80,6 +108,24 @@ print(sl)</code></pre>
 </div>
 
 <h2>SortedDict</h2>
+<p>キーの順に並んだ辞書です(C++の <code>map</code> に近い).<br>
+普通の <code>dict</code> と同じように使えて,さらに最小・最大のキーや k 番目のキーを取り出せます.</p>
+
+<pre><code class="language-python">from sortedcontainers import SortedDict
+
+sd = SortedDict()
+sd["banana"] = 3
+sd["apple"] = 5
+sd["cherry"] = 1
+print(sd)               # キーの順に並ぶ
+print(sd.peekitem(0))   # 最小のキーとその値
+print(sd.peekitem(-1))  # 最大のキーとその値
+print(sd.keys()[1])     # 小さい方から2番目のキー</code></pre>
+<pre class="output"><code class="nohighlight">SortedDict({'apple': 5, 'banana': 3, 'cherry': 1})
+('apple', 5)
+('cherry', 1)
+banana</code></pre>
+
 <h3>操作一覧</h3>
 <div class="table-wrap">
 <table>
