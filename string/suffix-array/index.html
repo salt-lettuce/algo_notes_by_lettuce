@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suffix Array | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="string/suffix-array/">
+
+<h1>Suffix Array（接尾辞配列）</h1>
+<p class="lead">部分文字列を便利に扱えるデータ構造について解説します。</p>
+
+<h2>Suffix Arrayとはなにか</h2>
+<p>まずは次のような配列を考えます。<br>
+要素 i に、文字列 S の i 番目から末尾までの部分文字列をもつ配列。<br>
+具体的には下記のようになります。</p>
+<p>文字列 S = "SuffixArray" のとき</p>
+
+<pre><code class="language-python">suffix[0]  = "SuffixArray"
+suffix[1]  = "uffixArray"
+suffix[2]  = "ffixArray"
+suffix[3]  = "fixArray"
+suffix[4]  = "ixArray"
+suffix[5]  = "xArray"
+suffix[6]  = "Array"
+suffix[7]  = "rray"
+suffix[8]  = "ray"
+suffix[9]  = "ay"
+suffix[10] = "y"</code></pre>
+
+<p>次にこれを辞書順でソートしたときの開始位置を要素に持つ配列を <code>SuffixArray</code> といいます。<br>
+具体的には下記のようになります（小文字は大文字よりも後ろに来る）。</p>
+
+<pre><code class="language-python">sa[0]  = 6   # "Array"
+sa[1]  = 0   # "SuffixArray"
+sa[2]  = 9   # "ay"
+sa[3]  = 2   # "ffixArray"
+sa[4]  = 3   # "fixArray"
+sa[5]  = 4   # "ixArray"
+sa[6]  = 8   # "ray"
+sa[7]  = 7   # "rray"
+sa[8]  = 1   # "uffixArray"
+sa[9]  = 5   # "xArray"
+sa[10] = 10  # "y"</code></pre>
+
+<p>SA-IS法というアルゴリズムを用いることで、文字列長を N としたときにこの配列を $O(N)$ で取得することができます。</p>
+
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) にはSuffix Arrayのライブラリが存在します。</p>
+
+<pre><code class="language-python">from atcoder.string import suffix_array
+S = "SuffixArray"
+sa = suffix_array(S)
+print(sa)
+for i in sa:
+    print(S[i:])</code></pre>
+<pre class="output"><code class="nohighlight">[6, 0, 9, 2, 3, 4, 8, 7, 1, 5, 10]
+Array
+SuffixArray
+ay
+ffixArray
+fixArray
+ixArray
+ray
+rray
+uffixArray
+xArray
+y</code></pre>
+
+<h2>使い方</h2>
+<p>SuffixArrayからソートされた任意の長さの部分文字列を復元し、二分探索などに利用できます。$O(|S|N)$</p>
+
+<pre><code class="language-python">from atcoder.string import suffix_array
+S = "SuffixArray"
+sa = suffix_array(S)
+
+S_sorted = []
+N = 2
+for i in sa:
+    S_sorted.append(S[i:i+N])
+print(S_sorted)</code></pre>
+<pre class="output"><code class="nohighlight">['Ar', 'Su', 'ay', 'ff', 'fi', 'ix', 'ra', 'rr', 'uf', 'xA', 'y']</code></pre>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

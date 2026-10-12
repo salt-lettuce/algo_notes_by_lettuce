@@ -11,11 +11,12 @@ algo-notes/
 │   ├── nav-data.js         ★ サイドバーの構成（ページを増やしたらここに追記）
 │   ├── site.js             ヘッダー・サイドバー・パンくず・子ページ一覧を生成
 │   └── style.css
-├── graph/index.html        分類ページ
-│   └── example/index.html  アルゴリズムページ（見本）
-│       └── child/index.html  子ページ（見本）
-├── tree/index.html
-└── others/index.html
+├── data-structure/index.html       分類ページ
+│   ├── fenwick-tree/index.html     アルゴリズムページ（画像は同じフォルダに置く）
+│   ├── segment-tree/index.html
+│   └── sorted-containers/index.html
+└── string/index.html
+    └── suffix-array/index.html
 ```
 
 1ページ = 1フォルダ + `index.html`。子ページはそのフォルダの中にさらにフォルダを作ります。

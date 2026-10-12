@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Segment Tree | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="data-structure/segment-tree/">
+
+<h1>Segment Tree（セグメントツリー）</h1>
+<p class="lead">区間クエリや更新が高速に行える木構造について解説します。</p>
+
+<h2>セグ木について</h2>
+<p>セグメントツリーは、配列に対する区間クエリと一点更新を $O(\log N)$ で行うことができる木構造です。<br>
+具体的には、ある区間の最小・最大値、和など、結合法則が成り立つ演算なら何でも取り扱うことができます。</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>オーダー</th></tr></thead>
+<tbody>
+<tr><td>区間クエリ</td><td>O(log(N))</td></tr>
+<tr><td>一点更新</td><td>O(log(N))</td></tr>
+<tr><td>区間更新(M個)</td><td>通常 O(Mlog(N))、遅延評価セグメント木では O(log(N))</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>下図は A = [3,1,4,1,5,9,2,6] のときの<code>最小値</code>についての値を持つセグ木の例です。<br>
+サイズは2Nとなっており、上に行くにつれてより大きな区間の最小値を持つようになっています。</p>
+
+<figure>
+<img src="segtree.png" alt="A=[3,1,4,1,5,9,2,6] の最小値セグ木。葉は8〜15、内部ノード1〜7が子の最小値を持つ" width="842" height="442">
+</figure>
+
+<h2>区間クエリの計算</h2>
+<p>上図の区間 [l, r) における最小値を求めることを考えます。<br>
+今回は、l=2, r=7, N=8, A[l:r]=[4,1,5,9,2], seg = セグ木とします。<br>
+また、暫定の最小値を ans に保存するため、十分に大きな値で初期化します。</p>
+<p>L = l+N = 10, R = r+N = 15 とし、それぞれの葉にアクセスできるようにします。</p>
+<ol>
+<li><strong>L=10, R=15, ans = inf</strong><br>
+Lは偶数なので、L = L//2 = 5 として親に移動。<br>
+Rは奇数で範囲外のため、R = R−1 = 14 とし、ans = min(ans, seg[14]) = 2 とし、R = R//2 = 7</li>
+<li><strong>L=5, R=7, ans = 2</strong><br>
+Lは奇数で親は使えないので、ans = min(ans, seg[5]) = 1 とし、L = L+1 = 6, L = L//2 = 3<br>
+Rは奇数で範囲外のため、R = R−1 = 6 とし、ans = min(ans, seg[6]) = 1 とし、R = R//2 = 3</li>
+<li><strong>L = R = 3</strong> のため操作を終了。ans = 1</li>
+</ol>
+
+<figure>
+<img src="query.png" alt="区間 [2, 7) の最小値クエリで参照されるノード" width="842" height="441">
+</figure>
+
+<h2>一点更新</h2>
+<p>一点更新は区間クエリとは異なり、比較的処理が簡単で直感的です。<br>
+A[1]の値を1から2に変更したいとします。<br>
+まず seg[9] = 2 とします。<br>
+次に親である seg[4] を、2つの子の値を用いて演算し更新します。seg[4] = min(seg[8], seg[9])<br>
+同様に seg[2], seg[1] を更新することで、一点更新の操作は $O(\log N)$ で完了することがわかります。</p>
+
+<figure>
+<img src="update.png" alt="A[1] を更新したときに更新されるノード 9→4→2→1" width="842" height="441">
+</figure>
+
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) にはセグ木のライブラリが存在します。</p>
+
+<pre><code class="language-python">from atcoder.segtree import SegTree
+
+def op(x, y): # 演算関数の定義 (min, max, xor, 和など)
+    return min(x, y)
+e = float('inf') # 単位元の定義
+a = [3,1,4,1,5,9,2,6] # 対象データを適宜設定
+
+st = SegTree(op, e, a) # 初期化: SegTree(演算関数, 単位元, 配列)
+
+print(st.prod(0, 3))  # 区間取得: prod(l, r) [0, 3) の最小値 -&gt; 1
+
+st.set(1, 2)         # 一点更新: a[1] を 2 に変更
+print(st.prod(0, 3))  # [0, 3) の最小値
+print(st.all_prod()) # 配列全体の取得</code></pre>
+<pre class="output"><code class="nohighlight">1
+2
+1</code></pre>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>SegTree.prod(l, r)</code></td><td>区間 [l, r) の演算結果</td><td>$O(\log N)$</td></tr>
+<tr><td><code>SegTree.all_prod()</code></td><td>全体の演算結果</td><td>$O(1)$</td></tr>
+<tr><td><code>SegTree.set(i, x)</code></td><td>元の配列Aの $A[i]$ を x に変更</td><td>$O(\log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>prod は代数学における結合法則が成り立つ二項演算 ($a \circ b$) の結果を広く呼ぶ「積」(product) から来ています。<br>
+掛け算の積ではないです。</p>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

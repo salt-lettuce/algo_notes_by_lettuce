@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SortedContainers | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="data-structure/sorted-containers/">
+
+<h1>SortedContainers</h1>
+<p class="lead">高速に整列された入れ物を扱うことができるSortedContainersについて解説していきます。</p>
+<p>参考：<a href="https://algo-method.com/courses/f102a001a27ba1cc">アルゴ式</a></p>
+
+<h2>SortedList</h2>
+
+<pre><code class="language-python">from sortedcontainers import SortedList
+
+sl = SortedList()
+sl.add(3)
+print(sl)</code></pre>
+<pre class="output"><code class="nohighlight">SortedList([3])</code></pre>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>sl.add(value)</code></td><td>要素 <code>value</code> を追加し、ソート状態を維持する</td><td>O(logN)</td></tr>
+<tr><td><code>sl.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>O(logN)</td></tr>
+<tr><td><code>sl.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>O(logN)</td></tr>
+<tr><td><code>sl.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>O(logN)</td></tr>
+<tr><td><code>sl[index]</code></td><td><code>index</code> 番目の要素を取得する (ランダムアクセス)</td><td>O(logN)</td></tr>
+<tr><td><code>value in sl</code></td><td><code>value</code> が含まれているか判定する</td><td>O(logN)</td></tr>
+<tr><td><code>sl.bisect_left(value)</code></td><td><code>value</code> 以上の要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
+<tr><td><code>sl.bisect_right(value)</code></td><td><code>value</code> より大きい要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
+<tr><td><code>sl.count(value)</code></td><td>要素 <code>value</code> の個数を返す</td><td>O(logN)</td></tr>
+<tr><td><code>sl.index(value)</code></td><td>要素 <code>value</code> が最初に現れるインデックスを返す</td><td>O(logN)</td></tr>
+<tr><td><code>len(sl)</code></td><td>要素数を返す</td><td>O(1)</td></tr>
+<tr><td><code>sl.clear()</code></td><td>全要素を削除する</td><td>O(N)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>SortedSet</h2>
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>ss.add(value)</code></td><td>要素 <code>value</code> を追加する (重複は無視)</td><td>O(logN)</td></tr>
+<tr><td><code>ss.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>O(logN)</td></tr>
+<tr><td><code>ss.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>O(logN)</td></tr>
+<tr><td><code>ss.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>O(logN)</td></tr>
+<tr><td><code>ss[index]</code></td><td><code>index</code> 番目の要素を取得する</td><td>O(logN)</td></tr>
+<tr><td><code>value in ss</code></td><td><code>value</code> が含まれているか判定する</td><td>O(logN)</td></tr>
+<tr><td><code>ss.bisect_left(value)</code></td><td><code>value</code> 以上の要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
+<tr><td><code>ss.bisect_right(value)</code></td><td><code>value</code> より大きい要素が現れる最初のインデックスを返す</td><td>O(logN)</td></tr>
+<tr><td><code>ss.index(value)</code></td><td>要素 <code>value</code> のインデックスを返す</td><td>O(logN)</td></tr>
+<tr><td><code>len(ss)</code></td><td>要素数を返す</td><td>O(1)</td></tr>
+<tr><td><code>ss.clear()</code></td><td>全要素を削除する</td><td>O(N)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>SortedDict</h2>
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>sd[key] = value</code></td><td>キーと値を設定する (キー順に自動ソート)</td><td>O(logN)</td></tr>
+<tr><td><code>del sd[key]</code></td><td>指定した <code>key</code> を削除する</td><td>O(logN)</td></tr>
+<tr><td><code>sd.pop(key)</code></td><td>指定した <code>key</code> を削除し、値を返す</td><td>O(logN)</td></tr>
+<tr><td><code>sd.popitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を削除して返す</td><td>O(logN)</td></tr>
+<tr><td><code>sd.peekitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を取得する (削除しない)</td><td>O(logN)</td></tr>
+<tr><td><code>key in sd</code></td><td><code>key</code> が含まれているか判定する</td><td>O(logN)</td></tr>
+<tr><td><code>sd.keys()[index]</code></td><td>ソート順で <code>index</code> 番目のキーを取得する</td><td>O(logN)</td></tr>
+<tr><td><code>sd.values()[index]</code></td><td>ソート順で <code>index</code> 番目の値を取得する</td><td>O(logN)</td></tr>
+<tr><td><code>len(sd)</code></td><td>キーの個数を返す</td><td>O(1)</td></tr>
+<tr><td><code>sd.clear()</code></td><td>全要素を削除する</td><td>O(N)</td></tr>
+</tbody>
+</table>
+</div>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>
