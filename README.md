@@ -10,6 +10,7 @@ algo-notes/
 ├── assets/
 │   ├── nav-data.js         ★ サイドバーの構成（ページを増やしたらここに追記）
 │   ├── site.js             ヘッダー・サイドバー・パンくず・子ページ一覧を生成
+│   ├── diagram.js          セグ木・BIT の図(SVG)をステップ表示
 │   └── style.css
 ├── data-structure/index.html       分類ページ
 │   ├── fenwick-tree/index.html     アルゴリズムページ（画像は同じフォルダに置く）
@@ -48,3 +49,4 @@ algo-notes/
 - 現在のページはハイライトされ、その祖先は自動で展開
 - ダーク/ライト切替（◐）、スマホ対応
 - コードの色付け（highlight.js）、数式（MathJax、`$...$` 記法）
+- セグ木・BIT の図（`diagram.js`）：`<figure class="diagram" data-diagram>` の中に JSON を書くと SVG で描画され、`steps` を2つ以上書くとクリックで1段階ずつ進む。書式は `assets/diagram.js` 冒頭のコメント参照

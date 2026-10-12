@@ -164,6 +164,11 @@
     document.head.appendChild(hl);
   }
 
+  // ---- 図 ----
+  if (document.querySelector("[data-diagram]")) {
+    document.body.appendChild(el("script", { src: ROOT + "assets/diagram.js" }));
+  }
+
   // ---- 数式 ----
   window.MathJax = {
     tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]] },

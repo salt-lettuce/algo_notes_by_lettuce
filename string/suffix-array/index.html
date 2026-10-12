@@ -10,12 +10,27 @@
 <body data-root="../../" data-path="string/suffix-array/">
 
 <h1>Suffix Array（接尾辞配列）</h1>
-<p class="lead">部分文字列を便利に扱えるデータ構造について解説します。</p>
+<p class="lead">部分文字列を便利に扱えるデータ構造について解説します.</p>
+
+<h2>Suffix Arrayについて</h2>
+<p>Suffix Arrayは,文字列のすべての接尾辞を辞書順に並べたときの開始位置の配列です.<br>
+接尾辞がソートされているので,ある文字列 T が部分文字列として含まれるかを二分探索で調べたり,LCP配列と組み合わせて異なる部分文字列の個数を数えたりできます.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td>Suffix Arrayの構築(SA-IS法)</td><td>O(N)</td></tr>
+<tr><td>文字列 T の検索(二分探索)</td><td>O(|T|logN)</td></tr>
+<tr><td>LCP配列の構築(ACLの <code>lcp_array</code>)</td><td>O(N)</td></tr>
+</tbody>
+</table>
+</div>
 
 <h2>Suffix Arrayとはなにか</h2>
-<p>まずは次のような配列を考えます。<br>
-要素 i に、文字列 S の i 番目から末尾までの部分文字列をもつ配列。<br>
-具体的には下記のようになります。</p>
+<p>まずは次のような配列を考えます.<br>
+要素 i に,文字列 S の i 番目から末尾までの部分文字列をもつ配列.<br>
+具体的には下記のようになります.</p>
 <p>文字列 S = "SuffixArray" のとき</p>
 
 <pre><code class="language-python">suffix[0]  = "SuffixArray"
@@ -30,8 +45,8 @@ suffix[8]  = "ray"
 suffix[9]  = "ay"
 suffix[10] = "y"</code></pre>
 
-<p>次にこれを辞書順でソートしたときの開始位置を要素に持つ配列を <code>SuffixArray</code> といいます。<br>
-具体的には下記のようになります（小文字は大文字よりも後ろに来る）。</p>
+<p>次にこれを辞書順でソートしたときの開始位置を要素に持つ配列を <code>SuffixArray</code> といいます.<br>
+具体的には下記のようになります（小文字は大文字よりも後ろに来る）.</p>
 
 <pre><code class="language-python">sa[0]  = 6   # "Array"
 sa[1]  = 0   # "SuffixArray"
@@ -45,10 +60,10 @@ sa[8]  = 1   # "uffixArray"
 sa[9]  = 5   # "xArray"
 sa[10] = 10  # "y"</code></pre>
 
-<p>SA-IS法というアルゴリズムを用いることで、文字列長を N としたときにこの配列を $O(N)$ で取得することができます。</p>
+<p>SA-IS法というアルゴリズムを用いることで,文字列長を N としたときにこの配列を $O(N)$ で取得することができます.</p>
 
 <h2>ライブラリでの実装</h2>
-<p>AtCoder Library (ACL) にはSuffix Arrayのライブラリが存在します。</p>
+<p>AtCoder Library (ACL) にはSuffix Arrayのライブラリが存在します.</p>
 
 <pre><code class="language-python">from atcoder.string import suffix_array
 S = "SuffixArray"
@@ -70,7 +85,7 @@ xArray
 y</code></pre>
 
 <h2>使い方</h2>
-<p>SuffixArrayからソートされた任意の長さの部分文字列を復元し、二分探索などに利用できます。$O(|S|N)$</p>
+<p>SuffixArrayからソートされた任意の長さの部分文字列を復元し,二分探索などに利用できます.$O(|S|N)$</p>
 
 <pre><code class="language-python">from atcoder.string import suffix_array
 S = "SuffixArray"

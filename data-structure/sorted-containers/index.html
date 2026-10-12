@@ -10,8 +10,23 @@
 <body data-root="../../" data-path="data-structure/sorted-containers/">
 
 <h1>SortedContainers</h1>
-<p class="lead">高速に整列された入れ物を扱うことができるSortedContainersについて解説していきます。</p>
+<p class="lead">高速に整列された入れ物を扱うことができるSortedContainersについて解説していきます.</p>
 <p>参考：<a href="https://algo-method.com/courses/f102a001a27ba1cc">アルゴ式</a></p>
+
+<h2>SortedContainersについて</h2>
+<p>Pythonの標準ライブラリには,要素を常にソートされた状態で保つ集合(C++の <code>std::set</code> や <code>std::multiset</code> にあたるもの)がありません.<br>
+<code>sortedcontainers</code> を使うと,追加・削除をしながら「x以上で最小の値」や「k番目に小さい値」を高速に求めることができます.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>クラス</th><th>用途</th><th>主な操作の計算量</th></tr></thead>
+<tbody>
+<tr><td><code>SortedList</code></td><td>重複ありのソート済みリスト(multiset)</td><td>追加・削除・インデックスアクセス・二分探索 O(logN)</td></tr>
+<tr><td><code>SortedSet</code></td><td>重複なしのソート済み集合(set)</td><td>追加・削除・インデックスアクセス・二分探索 O(logN)</td></tr>
+<tr><td><code>SortedDict</code></td><td>キー順に並んだ辞書(map)</td><td>追加・削除・k番目のキー取得 O(logN)</td></tr>
+</tbody>
+</table>
+</div>
 
 <h2>SortedList</h2>
 
@@ -27,7 +42,7 @@ print(sl)</code></pre>
 <table>
 <thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
 <tbody>
-<tr><td><code>sl.add(value)</code></td><td>要素 <code>value</code> を追加し、ソート状態を維持する</td><td>O(logN)</td></tr>
+<tr><td><code>sl.add(value)</code></td><td>要素 <code>value</code> を追加し,ソート状態を維持する</td><td>O(logN)</td></tr>
 <tr><td><code>sl.discard(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合もエラーにならない)</td><td>O(logN)</td></tr>
 <tr><td><code>sl.remove(value)</code></td><td>要素 <code>value</code> を削除する (存在しない場合は <code>ValueError</code>)</td><td>O(logN)</td></tr>
 <tr><td><code>sl.pop(index=-1)</code></td><td><code>index</code> 番目の要素を削除して返す (デフォルトは末尾)</td><td>O(logN)</td></tr>
@@ -72,7 +87,7 @@ print(sl)</code></pre>
 <tbody>
 <tr><td><code>sd[key] = value</code></td><td>キーと値を設定する (キー順に自動ソート)</td><td>O(logN)</td></tr>
 <tr><td><code>del sd[key]</code></td><td>指定した <code>key</code> を削除する</td><td>O(logN)</td></tr>
-<tr><td><code>sd.pop(key)</code></td><td>指定した <code>key</code> を削除し、値を返す</td><td>O(logN)</td></tr>
+<tr><td><code>sd.pop(key)</code></td><td>指定した <code>key</code> を削除し,値を返す</td><td>O(logN)</td></tr>
 <tr><td><code>sd.popitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を削除して返す</td><td>O(logN)</td></tr>
 <tr><td><code>sd.peekitem(index=-1)</code></td><td>ソート順で <code>index</code> 番目の (key, value) を取得する (削除しない)</td><td>O(logN)</td></tr>
 <tr><td><code>key in sd</code></td><td><code>key</code> が含まれているか判定する</td><td>O(logN)</td></tr>

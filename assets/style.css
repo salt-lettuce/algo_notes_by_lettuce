@@ -6,6 +6,12 @@
   --border: #d1d9e0;
   --accent: #0969da;
   --accent-soft: #ddf4ff;
+  --dg-line: #8c959f;
+  --dg-rng: #eaeef2;
+  --dg-use: #c9f0d3;
+  --dg-upd: #ffeaa8;
+  --dg-upd-fg: #cf222e;
+  --dg-cur: #bf3989;
   --header-h: 52px;
   --sidebar-w: 260px;
 }
@@ -15,9 +21,15 @@
     --bg-soft: #161b22;
     --fg: #e6edf3;
     --fg-muted: #9198a1;
-    --border: #30363d;
+    --border: #59636e;
     --accent: #4493f8;
     --accent-soft: #1f2d3d;
+    --dg-line: #8b949e;
+    --dg-rng: #2a313c;
+    --dg-use: #1b4b2c;
+    --dg-upd: #5a4510;
+    --dg-upd-fg: #ff9a92;
+    --dg-cur: #f778ba;
   }
 }
 :root[data-theme="dark"] {
@@ -25,9 +37,15 @@
   --bg-soft: #161b22;
   --fg: #e6edf3;
   --fg-muted: #9198a1;
-  --border: #30363d;
+  --border: #59636e;
   --accent: #4493f8;
   --accent-soft: #1f2d3d;
+  --dg-line: #8b949e;
+  --dg-rng: #2a313c;
+  --dg-use: #1b4b2c;
+  --dg-upd: #5a4510;
+  --dg-upd-fg: #ff9a92;
+  --dg-cur: #f778ba;
 }
 
 * { box-sizing: border-box; }
@@ -138,6 +156,45 @@ figure img {
   background: #fff; border: 1px solid var(--border); border-radius: 8px;
 }
 figcaption { font-size: 0.85rem; color: var(--fg-muted); }
+
+/* ---- diagram ---- */
+.diagram svg { display: block; width: 100%; max-width: 640px; height: auto; }
+.diagram svg.clickable { cursor: pointer; }
+.diagram text { text-anchor: middle; dominant-baseline: central; fill: var(--fg); font-family: "JetBrains Mono", ui-monospace, monospace; }
+.diagram .idx { font-size: 12px; }
+.diagram .val { font-size: 17px; }
+.diagram .hd { fill: var(--accent-soft); stroke: var(--dg-line); }
+.diagram .bd { fill: var(--bg); stroke: var(--dg-line); }
+.diagram .node.rng .bd { fill: var(--dg-rng); }
+.diagram .node.use .bd { fill: var(--dg-use); }
+.diagram .node.upd .bd { fill: var(--dg-upd); }
+.diagram .node.upd .val { fill: var(--dg-upd-fg); font-weight: 700; }
+.diagram .node.ref .bd { stroke: var(--dg-cur); stroke-width: 2; stroke-dasharray: 5 3; }
+.diagram .node.cur .bd { stroke: var(--dg-cur); stroke-width: 3; }
+.diagram .badge { fill: var(--dg-cur); }
+.diagram .badge-t { fill: #fff; font-size: 11px; font-weight: 700; }
+.dg-controls { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.dg-controls button {
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg-soft); color: var(--fg);
+  padding: 4px 12px; font: inherit; font-size: 0.88rem; cursor: pointer;
+}
+.dg-controls button:hover:not(:disabled) { border-color: var(--accent); }
+.dg-controls button:disabled { opacity: 0.4; cursor: default; }
+.dg-count { font-size: 0.85rem; color: var(--fg-muted); min-width: 3.5em; text-align: center; }
+.dg-caption {
+  margin: 8px 0 0; padding: 8px 12px; min-height: 3.6em;
+  border-left: 3px solid var(--dg-cur); background: var(--bg-soft);
+  font-size: 0.92rem;
+}
+.dg-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; font-size: 0.82rem; color: var(--fg-muted); }
+.dg-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dg-legend .sw { width: 14px; height: 14px; border: 1px solid var(--dg-line); border-radius: 3px; background: var(--bg); }
+.dg-legend .sw.rng { background: var(--dg-rng); }
+.dg-legend .sw.use { background: var(--dg-use); }
+.dg-legend .sw.upd { background: var(--dg-upd); }
+.dg-legend .sw.cur { border: 2px solid var(--dg-cur); }
+.dg-legend .sw.ref { border: 2px dashed var(--dg-cur); }
 
 /* ---- child cards ---- */
 .cards {
