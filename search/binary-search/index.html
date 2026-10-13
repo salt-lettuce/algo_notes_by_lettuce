@@ -92,54 +92,118 @@ print(bisect_right(A, 30) - bisect_left(A, 30))  # 30 の個数</code></pre>
 </table>
 </div>
 
-<h2>二分探索の実装</h2>
-<p>上の図の手順をそのままコードにすると,次のようになります.</p>
-
-<pre><code class="language-python">A = [2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91, 99]
-target = 72
-left, right = 0, len(A) - 1   # 探す範囲 [left, right]
-while left &lt;= right:
-    mid = (left + right) // 2
-    print(f"A[{mid}] = {A[mid]} と比較")
-    if A[mid] == target: break
-    elif A[mid] &lt; target: left = mid + 1   # 右半分に絞る
-    else: right = mid - 1                  # 左半分に絞る
-print(f"{target} は {mid} 番目")</code></pre>
-<pre class="output"><code class="nohighlight">A[5] = 23 と比較
-A[8] = 56 と比較
-A[10] = 91 と比較
-A[9] = 72 と比較
-72 は 9 番目</code></pre>
-
-<p>値が見つからないときは <code>left &gt; right</code> になってループを抜けます.</p>
-
 <h3>境界を探す二分探索</h3>
-<p>実際の問題では「ちょうど x の位置」よりも,<strong>条件を満たす最小の位置(境界)</strong>を探すことが多いです.<br>
-条件 <code>is_ok(x)</code> が,ある位置を境に False から True に切り替わるとき,次の形で境界を求められます.</p>
+<p>実際の問題では「ちょうど x の位置」よりも,「x 以上の値が始まる位置」のような<strong>条件を満たす最小の位置(境界)</strong>を探すことが多いです.<br>
+条件がある位置を境に「満たさない → 満たす」と切り替わるとき,次の手順で境界を求められます.</p>
 <ul>
-<li><code>ng</code> は常に条件を満たさない側,<code>ok</code> は常に条件を満たす側に置く</li>
-<li>真ん中が条件を満たせば <code>ok</code> を,満たさなければ <code>ng</code> を動かす</li>
+<li><code>ng</code> は常に条件を満たさない側,<code>ok</code> は常に条件を満たす側に置く(最初は <code>ng = -1</code>, <code>ok = N</code>)</li>
+<li>真ん中 <code>mid</code> が条件を満たせば <code>ok = mid</code>,満たさなければ <code>ng = mid</code> にする</li>
 <li><code>ok</code> と <code>ng</code> が隣り合ったら終了.<code>ok</code> が答え</li>
 </ul>
+<p>この形なら値が見つからない場合や重複がある場合も同じように扱えるので,下の実装ではこちらを使います.<br>
+また,条件は配列の値でなくてもよく,「$x^2 \ge 1000$ を満たす最小の整数 $x$」のように<strong>答えの値そのものを二分探索</strong>することもできます.</p>
 
-<pre><code class="language-python">A = [2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91, 99]
-def is_ok(i):
-    return A[i] &gt;= 50  # 50 以上か
+<h2>クラスでの実装</h2>
+<p>クラスを用いると以下のように実装することができます.<br>
+競技プログラミングでよく使う,<strong>単調増加する関数 $f(x)$ の値で二分探索する</strong>形です.<br>
+$f$ を渡しておくと,「$f(x) \ge$ target となる最小の $x$」「$f(x) \le$ target となる最大の $x$」を整数・実数の範囲で求められます.<br>
+中身は上の <code>ok</code> / <code>ng</code> の二分探索です.</p>
 
-ng, ok = -1, len(A)  # A[-1] は条件を満たさない,A[len(A)] は満たすとみなす
-while ok - ng &gt; 1:
-    mid = (ok + ng) // 2
-    if is_ok(mid): ok = mid
-    else: ng = mid
-print(ok)</code></pre>
-<pre class="output"><code class="nohighlight">8</code></pre>
+<pre><code class="language-python">class BinarySearch:
+    # f は単調増加(x が大きいほど f(x) も大きいか等しい)な関数
+    def __init__(self, f):
+        self.f = f
 
-<p>これは <code>bisect_left(A, 50)</code> と同じ値です.<br>
-<code>is_ok</code> は配列の値でなくてもよく,「$x^2 \ge 1000$ を満たす最小の整数 $x$」のように<strong>答えの値そのものを二分探索</strong>することもできます(<code>ng, ok = 0, 1000</code> として <code>is_ok = lambda x: x * x &gt;= 1000</code> にすると 32 が求まります).</p>
+    # f(x) &gt;= target となる最小の整数 x を [lo, hi] から探す (なければ hi + 1)
+    def min_x(self, target, lo, hi):
+        ng, ok = lo - 1, hi + 1 # ng 側は常に条件を満たさない,ok 側は常に満たすとみなす
+        while ok - ng &gt; 1:
+            mid = (ok + ng) // 2
+            if self.f(mid) &gt;= target:
+                ok = mid # 答えは mid 以下
+            else:
+                ng = mid # 答えは mid より大きい
+        return ok
 
-<h2>bisect を用いた二分探索</h2>
-<p>Python の <code>bisect</code> モジュールは,<strong>ソート済みのリスト</strong>に対して,ソート順を崩さずに値を挿入できる位置を二分探索で求めます.<br>
-自分で二分探索を書くよりも短く,間違いも起きにくいので,配列の二分探索はこれを使うのがおすすめです.</p>
+    # f(x) &lt;= target となる最大の整数 x を [lo, hi] から探す (なければ lo - 1)
+    def max_x(self, target, lo, hi):
+        ok, ng = lo - 1, hi + 1
+        while ng - ok &gt; 1:
+            mid = (ok + ng) // 2
+            if self.f(mid) &lt;= target:
+                ok = mid # 答えは mid 以上
+            else:
+                ng = mid # 答えは mid より小さい
+        return ok
+
+    # f(x) &gt;= target となる最小の実数 x を [lo, hi] から探す (回数を決めて範囲を半分にし続ける)
+    def min_x_real(self, target, lo, hi, n_iter=100):
+        for _ in range(n_iter):
+            mid = (lo + hi) / 2
+            if self.f(mid) &gt;= target:
+                hi = mid
+            else:
+                lo = mid
+        return hi
+
+# 例1: f(x) = x^2
+bs = BinarySearch(lambda x: x * x)
+print(bs.min_x(1000, 0, 1000)) # x^2 &gt;= 1000 となる最小の整数
+print(bs.max_x(1000, 0, 1000)) # x^2 &lt;= 1000 となる最大の整数
+print(bs.min_x_real(2, 0, 2)) # x^2 &gt;= 2 となる最小の実数 (√2)
+
+# 例2: f(i) = A[i] (ソート済みなので単調増加)
+A = [2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91, 99]
+bs = BinarySearch(lambda i: A[i])
+print(bs.min_x(72, 0, len(A) - 1)) # A[i] &gt;= 72 となる最小の i (bisect_left(A, 72) と同じ)
+print(bs.max_x(38, 0, len(A) - 1) + 1) # 38 以下の要素の個数 (bisect_right(A, 38) と同じ)
+
+# 例3: 答えで二分探索.作るのに T[i] 分かかる機械で,10 個作るのにかかる最短の時間
+T = [2, 3, 7]
+bs = BinarySearch(lambda t: sum(t // ti for ti in T)) # t 分で作れる個数
+print(bs.min_x(10, 0, 10**18))</code></pre>
+<pre class="output"><code class="nohighlight">32
+31
+1.4142135623730951
+9
+7
+12</code></pre>
+
+<p>例3のように,「答えを $t$ と決めたら条件を満たすか判定できる」「$t$ が大きいほど条件を満たしやすい」問題は,答えの値で二分探索できます.<br>
+探す範囲の幅を $W$ とすると,$f$ を呼ぶ回数は $O(\log W)$ 回です.例3では $W = 10^{18}$ でも 60 回程度で済みます.<br>
+実数版はループを抜ける条件を誤差で決めると無限ループになることがあるので,回数(100回なら幅は $2^{-100}$ 倍)で決めるのが安全です.</p>
+
+<h2>ライブラリでの実装</h2>
+<p>Python の標準ライブラリには <code>bisect</code> モジュールが存在します.<br>
+<strong>ソート済みのリスト</strong>に対して,ソート順を崩さずに値を挿入できる位置を二分探索で求めます.<br>
+配列の中を探すだけなら,クラスよりもこちらの方が短く書けます.</p>
+
+<pre><code class="language-python">from bisect import bisect_left, bisect_right
+
+A = [2, 5, 8, 12, 16, 23, 38, 45, 56, 72, 91, 99]
+
+i = bisect_left(A, 72)
+print(i, A[i] == 72) # 72 は 9 番目にある
+print(bisect_left(A, 50)) # 50 以上で最小の値 (56) の位置
+print(bisect_right(A, 38)) # 38 以下の要素の個数</code></pre>
+<pre class="output"><code class="nohighlight">9 True
+8
+7</code></pre>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>bisect_left(A, x)</code></td><td><code>x</code> を挿入できる最も左の位置を返す(<code>x</code> 以上の要素が始まる位置)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>bisect_right(A, x)</code><br><code>bisect(A, x)</code></td><td><code>x</code> を挿入できる最も右の位置を返す(<code>x</code> より大きい要素が始まる位置)</td><td>$O(\log N)$</td></tr>
+<tr><td><code>insort_left(A, x)</code></td><td><code>bisect_left</code> の位置に <code>x</code> を挿入する</td><td>$O(N)$</td></tr>
+<tr><td><code>insort_right(A, x)</code><br><code>insort(A, x)</code></td><td><code>bisect_right</code> の位置に <code>x</code> を挿入する</td><td>$O(N)$</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>insort</code> は位置を探すのは $O(\log N)$ ですが,リストの要素をずらして挿入するので全体で $O(N)$ かかります.<br>
+挿入や削除をくり返しながら二分探索したいときは <a href="../../data-structure/sorted-containers/">SortedContainers</a> の <code>SortedList</code> を使います.</p>
 
 <h3>bisect_left と bisect_right の違い</h3>
 <p>探す値がリストにあるとき,<code>bisect_left</code> はその値の<strong>左端</strong>,<code>bisect_right</code> は<strong>右端の次</strong>の位置を返します.<br>
@@ -162,6 +226,7 @@ print(ok)</code></pre>
 </script>
 </figure>
 
+<h3>個数の数え方</h3>
 <p>どちらも「返り値 = それより左にある要素の個数」になっているので,個数を数えるのにそのまま使えます.</p>
 
 <div class="table-wrap">
@@ -179,125 +244,11 @@ print(ok)</code></pre>
 </table>
 </div>
 
-<h3>操作一覧</h3>
-<div class="table-wrap">
-<table>
-<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
-<tbody>
-<tr><td><code>bisect_left(A, x)</code></td><td><code>x</code> を挿入できる最も左の位置を返す(<code>x</code> 以上の要素が始まる位置)</td><td>$O(\log N)$</td></tr>
-<tr><td><code>bisect_right(A, x)</code><br><code>bisect(A, x)</code></td><td><code>x</code> を挿入できる最も右の位置を返す(<code>x</code> より大きい要素が始まる位置)</td><td>$O(\log N)$</td></tr>
-<tr><td><code>insort_left(A, x)</code></td><td><code>bisect_left</code> の位置に <code>x</code> を挿入する</td><td>$O(N)$</td></tr>
-<tr><td><code>insort_right(A, x)</code><br><code>insort(A, x)</code></td><td><code>bisect_right</code> の位置に <code>x</code> を挿入する</td><td>$O(N)$</td></tr>
-</tbody>
-</table>
-</div>
-<p><code>insort</code> は位置を探すのは $O(\log N)$ ですが,リストの要素をずらして挿入するので全体で $O(N)$ かかります.<br>
-挿入や削除をくり返しながら二分探索したいときは <a href="../../data-structure/sorted-containers/">SortedContainers</a> の <code>SortedList</code> を使います.</p>
-
 <h2>ソートの計算量に注意</h2>
 <p>二分探索はソート済みのデータにしか使えません.<br>
 Python の <code>sort()</code> や <code>sorted()</code> は Timsort というアルゴリズムで,$O(N \log N)$ でソートできます.<br>
 ソートは最初に1回だけ行い,その後に二分探索を何回もするのが基本の形です.<br>
 二分探索のたびにソートし直すと,1回あたり $O(N \log N)$ かかってしまい,二分探索を使う意味がなくなります.</p>
-
-<h2>練習問題</h2>
-<p>解答例はクリックで開きます.</p>
-
-<h3>最小の添字(<a href="https://algo-method.com/tasks/370">アルゴ式</a>)</h3>
-<p>小さい順に並んだ <code>A</code> と,<code>B</code> の各値 <code>b</code> について,$A_x \ge b$ となる最小の $x$ を求める問題です.<br>
-「<code>b</code> 以上が始まる位置」なので <code>bisect_left</code> そのものです.全体で $O(M \log N)$ です.</p>
-<details>
-<summary>解答例</summary>
-<pre><code class="language-python">from bisect import bisect_left
-
-N, M = map(int, input().split())
-A = list(map(int, input().split()))  # すでにソート済み
-B = list(map(int, input().split()))
-for b in B:
-    print(bisect_left(A, b))</code></pre>
-</details>
-
-<h3>小さい数の個数(<a href="https://algo-method.com/tasks/382">アルゴ式</a>)</h3>
-<p><code>B</code> の各値 <code>b</code> について,$A_x \le b$ となる $x$ の個数を求める問題です.<br>
-<code>A</code> はソートされていないので,最初に1回ソートします.<code>b</code> 以下の個数は <code>bisect_right</code> で求まります.全体で $O((N + M) \log N)$ です.</p>
-<details>
-<summary>解答例</summary>
-<pre><code class="language-python">from bisect import bisect_right
-
-N, M = map(int, input().split())
-A = sorted(map(int, input().split()))
-B = list(map(int, input().split()))
-for b in B:
-    print(bisect_right(A, b))  # b 以下の個数</code></pre>
-</details>
-<p>整数なら <code>bisect_left(A, b + 1)</code>(<code>b + 1</code> 未満の個数)でも同じ値になります.</p>
-
-<h3>和が K 以上のペア(<a href="https://algo-method.com/tasks/381">アルゴ式</a>)</h3>
-<p>$A_i + A_j \ge K$ となる組 $(i, j)$ の個数を求める問題です($i = j$ も含みます).<br>
-$i$ を固定すると,条件は $A_j \ge K - A_i$ になるので,「$K - A_i$ 以上の個数」を二分探索で数えます.全体で $O(N \log N)$ です.</p>
-<details>
-<summary>解答例</summary>
-<pre><code class="language-python">from bisect import bisect_left
-
-N, K = map(int, input().split())
-A = sorted(map(int, input().split()))
-ans = 0
-for a in A:
-    ans += N - bisect_left(A, K - a)  # K - a 以上の個数
-print(ans)</code></pre>
-</details>
-
-<h3>何番目の重さ？(<a href="https://algo-method.com/tasks/399">アルゴ式</a>)</h3>
-<p>重さがすべて異なる $N$ 個のボールについて,それぞれ何番目に軽いか(0番目から数える)を求める問題です.<br>
-「何番目に軽いか」は「自分より軽いボールの個数」なので,ソートしたリストで <code>bisect_left</code> を使います.全体で $O(N \log N)$ です.</p>
-<details>
-<summary>解答例</summary>
-<pre><code class="language-python">from bisect import bisect_left
-
-N = int(input())
-W = list(map(int, input().split()))
-S = sorted(W)
-for w in W:
-    print(bisect_left(S, w))  # w より軽いボールの個数</code></pre>
-</details>
-
-<h3>Min Difference(<a href="https://atcoder.jp/contests/abc212/tasks/abc212_c">AtCoder ABC212 C</a>)</h3>
-<p>$|A_i - B_j|$ の最小値を求める問題です.<br>
-各 <code>a</code> について,<code>B</code> の中で <code>a</code> に一番近いのは「<code>a</code> 以上で最小の値」か「<code>a</code> 未満で最大の値」のどちらかです.<br>
-<code>B</code> をソートしておき,<code>bisect_left</code> で求めた位置とその1つ左を調べます.全体で $O((N + M) \log M)$ です.</p>
-<details>
-<summary>解答例</summary>
-<pre><code class="language-python">from bisect import bisect_left
-
-N, M = map(int, input().split())
-A = list(map(int, input().split()))
-B = sorted(map(int, input().split())) + [float("inf")]  # 番兵
-ans = float("inf")
-for a in A:
-    i = bisect_left(B, a)  # B[i] が a 以上で最小,B[i - 1] が a 未満で最大
-    ans = min(ans, B[i] - a, abs(a - B[i - 1]))
-print(ans)</code></pre>
-</details>
-<p>末尾に無限大(番兵)を足しておくと,<code>i</code> が範囲外になる場合の場合分けが不要になります.<br>
-<code>i = 0</code> のときの <code>B[i - 1]</code> も番兵(<code>B[-1]</code>)になり,差が無限大になるので答えに影響しません.</p>
-
-<h3>Reindeer and Sleigh(<a href="https://atcoder.jp/contests/abc334/tasks/abc334_d">AtCoder ABC334 D</a>)</h3>
-<p>ソリ $i$ を引くにはトナカイが $R_i$ 頭必要で,トナカイ $X$ 頭で最大何台のソリを引けるかを答える問題です.<br>
-台数を多くするには,必要な頭数が少ないソリから選ぶのが最適です.<br>
-<code>R</code> をソートして累積和 <code>S</code> を作ると,<code>S[k - 1]</code> が「$k$ 台引くのに必要な頭数」になるので,<code>X</code> 以下の個数を <code>bisect_right</code> で数えます.<br>
-全体で $O(N \log N + Q \log N)$ です.</p>
-<details>
-<summary>解答例</summary>
-<pre><code class="language-python">from bisect import bisect_right
-from itertools import accumulate
-
-N, Q = map(int, input().split())
-R = sorted(map(int, input().split()))
-S = list(accumulate(R))  # S[k - 1] = k 台引くのに必要な頭数
-for _ in range(Q):
-    X = int(input())
-    print(bisect_right(S, X))  # X 頭以下で引ける台数</code></pre>
-</details>
 
 <script src="../../assets/nav-data.js"></script>
 <script src="../../assets/site.js"></script>
