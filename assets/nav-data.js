@@ -18,5 +18,13 @@ window.NAV_DATA = [
     children: [
       { title: "Suffix Array", path: "string/suffix-array/", desc: "接尾辞を辞書順に並べた配列" }
     ]
+  },
+  {
+    title: "探索",
+    path: "search/",
+    desc: "値や境界を効率よく探す",
+    children: [
+      { title: "Binary Search", path: "search/binary-search/", desc: "ソート済み配列の探索を O(log N)" }
+    ]
   }
 ];

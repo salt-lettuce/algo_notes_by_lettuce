@@ -19,6 +19,8 @@ algo-notes/
 │   └── sorted-containers/index.html
 ├── string/index.html
 │   └── suffix-array/index.html
+├── search/index.html
+│   └── binary-search/index.html
 └── _template/                      新しいページのひな形（GitHub Pages には公開されない）
     ├── page/index.html             アルゴリズムページ用
     └── category/index.html         分類ページ用
