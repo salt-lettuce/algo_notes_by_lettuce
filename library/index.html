@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ライブラリ | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../assets/icon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-root="../" data-path="library/">
+
+<h1>Library（ライブラリ）</h1>
+<p class="lead">コンテストでコピーして使う自作コードをまとめています.</p>
+<p>参考：<a href="https://info.atcoder.jp/entry/llm-rules-ja">AtCoder生成AI対策ルール</a></p>
+
+<h2>ライブラリについて</h2>
+<p>このページのコードは,生成AIを用いて作成したものを含みます.<br>
+AtCoder生成AI対策ルール(20261014版)では,コンテスト開始前に生成AIで作成しておいたコードは,次の条件を満たせば ABC・ARC・AGC で使えます.</p>
+<ul>
+<li>コンテスト開始前にWeb上に公開しておく(生成した時期の証明のため)</li>
+<li>コピーして使うときは<strong>参照URLを添付</strong>する</li>
+</ul>
+<p>各コードの1行目には参照URLをコメントで書いてあるので,<strong>copy ボタンでコード全体をコピーすれば,そのまま条件を満たせます</strong>.<br>
+公開した日時は <a href="https://github.com/salt-lettuce/algo_notes_by_lettuce/commits/main/library/index.html">GitHub のコミット履歴</a>で確認できます.</p>
+
+<div class="table-wrap">
+<table>
+<thead><tr><th>ライブラリ</th><th>内容</th><th>解説ページ</th></tr></thead>
+<tbody>
+<tr><td><a href="#bit"><code>BIT</code></a></td><td>一点加算・区間和を $O(\log N)$ (1-indexed)</td><td><a href="../data-structure/fenwick-tree/">Fenwick Tree (BIT)</a></td></tr>
+<tr><td><a href="#binary-search"><code>BinarySearch</code></a></td><td>単調増加な関数 $f(x)$ の値で二分探索</td><td><a href="../search/binary-search/">Binary Search</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="bit">BIT</h2>
+<p>一点加算と区間和を $O(\log N)$ で行います.インデックスは <strong>1-indexed</strong> です.<br>
+参照URL：<code>https://salt-lettuce.github.io/algo_notes_by_lettuce/library/#bit</code></p>
+
+<pre><code class="language-python"># https://salt-lettuce.github.io/algo_notes_by_lettuce/library/#bit
+class BIT:
+    # 長さN+1の配列を初期化
+    def __init__(self, N):
+        self.size = N
+        self.bit = [0]*(N+1)
+
+    # i番目までの和を求める
+    def sum(self, i):
+        res = 0
+        while i &gt; 0: # bit[0]=0なので計算しない
+            res += self.bit[i] # フェニック木のi番目の値を加算
+            i -= -i &amp; i # 最も右にある1の桁を0にする
+        return res
+
+    # i番目の値にxを足して更新する
+    def add(self, i, x):
+        while i &lt;= self.size: # iがNを超えないように制限
+            self.bit[i] += x # フェニック木のi番目にxを足して更新
+            i += -i &amp; i # 最も右にある1の桁に1を足す</code></pre>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>BIT(N)</code></td><td>長さ N の BIT を作る(全要素 0)</td><td>$O(N)$</td></tr>
+<tr><td><code>BIT.add(i, x)</code></td><td>i 番目の要素に x を加算</td><td>$O(\log N)$</td></tr>
+<tr><td><code>BIT.sum(i)</code></td><td>1〜i 番目の和.区間 [l, r] の和は <code>sum(r) - sum(l-1)</code></td><td>$O(\log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="binary-search">BinarySearch</h2>
+<p>単調増加する関数 $f(x)$ について,「$f(x) \ge$ target となる最小の $x$」「$f(x) \le$ target となる最大の $x$」を求めます.<br>
+参照URL：<code>https://salt-lettuce.github.io/algo_notes_by_lettuce/library/#binary-search</code></p>
+
+<pre><code class="language-python"># https://salt-lettuce.github.io/algo_notes_by_lettuce/library/#binary-search
+class BinarySearch:
+    # f は単調増加(x が大きいほど f(x) も大きいか等しい)な関数
+    def __init__(self, f):
+        self.f = f
+
+    # f(x) &gt;= target となる最小の整数 x を [lo, hi] から探す (なければ hi + 1)
+    def min_x(self, target, lo, hi):
+        ng, ok = lo - 1, hi + 1 # ng 側は常に条件を満たさない,ok 側は常に満たすとみなす
+        while ok - ng &gt; 1:
+            mid = (ok + ng) // 2
+            if self.f(mid) &gt;= target:
+                ok = mid # 答えは mid 以下
+            else:
+                ng = mid # 答えは mid より大きい
+        return ok
+
+    # f(x) &lt;= target となる最大の整数 x を [lo, hi] から探す (なければ lo - 1)
+    def max_x(self, target, lo, hi):
+        ok, ng = lo - 1, hi + 1
+        while ng - ok &gt; 1:
+            mid = (ok + ng) // 2
+            if self.f(mid) &lt;= target:
+                ok = mid # 答えは mid 以上
+            else:
+                ng = mid # 答えは mid より小さい
+        return ok
+
+    # f(x) &gt;= target となる最小の実数 x を [lo, hi] から探す (回数を決めて範囲を半分にし続ける)
+    def min_x_real(self, target, lo, hi, n_iter=100):
+        for _ in range(n_iter):
+            mid = (lo + hi) / 2
+            if self.f(mid) &gt;= target:
+                hi = mid
+            else:
+                lo = mid
+        return hi</code></pre>
+
+<h3>操作一覧</h3>
+<p>探す範囲の幅を $W$ とし,$f$ の計算量は含めていません.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>BinarySearch(f)</code></td><td>単調増加な関数 f を渡して作る</td><td>$O(1)$</td></tr>
+<tr><td><code>min_x(target, lo, hi)</code></td><td>$f(x) \ge$ target となる最小の整数 x (なければ hi + 1)</td><td>$O(\log W)$</td></tr>
+<tr><td><code>max_x(target, lo, hi)</code></td><td>$f(x) \le$ target となる最大の整数 x (なければ lo − 1)</td><td>$O(\log W)$</td></tr>
+<tr><td><code>min_x_real(target, lo, hi, n_iter)</code></td><td>$f(x) \ge$ target となる最小の実数 x</td><td>$O(n\_iter)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<script src="../assets/nav-data.js"></script>
+<script src="../assets/site.js"></script>
+</body>
+</html>

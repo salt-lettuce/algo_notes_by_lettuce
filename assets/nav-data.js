@@ -26,5 +26,10 @@ window.NAV_DATA = [
     children: [
       { title: "Binary Search", path: "search/binary-search/", desc: "ソート済み配列の探索を O(log N)" }
     ]
+  },
+  {
+    title: "ライブラリ",
+    path: "library/",
+    desc: "コンテストで使う自作コード(参照URL付き)"
   }
 ];

@@ -107,7 +107,8 @@ print(bisect_right(A, 30) - bisect_left(A, 30))  # 30 の個数</code></pre>
 <p>クラスを用いると以下のように実装することができます.<br>
 競技プログラミングでよく使う,<strong>単調増加する関数 $f(x)$ の値で二分探索する</strong>形です.<br>
 $f$ を渡しておくと,「$f(x) \ge$ target となる最小の $x$」「$f(x) \le$ target となる最大の $x$」を整数・実数の範囲で求められます.<br>
-中身は上の <code>ok</code> / <code>ng</code> の二分探索です.</p>
+中身は上の <code>ok</code> / <code>ng</code> の二分探索です.<br>
+コンテストで使うときは,参照URL付きの<a href="../../library/#binary-search">ライブラリ</a>からコピーしてください.</p>
 
 <pre><code class="language-python">class BinarySearch:
     # f は単調増加(x が大きいほど f(x) も大きいか等しい)な関数

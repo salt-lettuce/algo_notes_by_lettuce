@@ -21,6 +21,7 @@ algo-notes/
 │   └── suffix-array/index.html
 ├── search/index.html
 │   └── binary-search/index.html
+├── library/index.html              ライブラリ（コンテストで使う自作コード.各コード1行目に参照URL）
 └── _template/                      新しいページのひな形（GitHub Pages には公開されない）
     ├── page/index.html             アルゴリズムページ用
     └── category/index.html         分類ページ用
@@ -39,6 +40,9 @@ algo-notes/
    ```js
    { title: "ダイクストラ法", path: "graph/dijkstra/", desc: "非負重みの最短経路" }
    ```
+
+コンテストで使うコードは `library/index.html` にも載せます（`<h2 id="名前">` の節を追加し,コードの1行目に `# https://salt-lettuce.github.io/algo_notes_by_lettuce/library/#名前` を書く）.
+生成AIで作ったコードは,コンテスト開始前に push して公開しておく必要があります（[AtCoder生成AI対策ルール](https://info.atcoder.jp/entry/llm-rules-ja)）.
 
 分類を増やすときは `_template/category/` をコピーし、`nav-data.js` の一番外側に追加します。
 `<div data-children></div>` を置いたところには子ページのカード一覧が自動で出ます。
