@@ -12,6 +12,7 @@
   --dg-upd: #ffeaa8;
   --dg-upd-fg: #cf222e;
   --dg-cur: #bf3989;
+  --dg-path: #1a7f37;
   --header-h: 52px;
   --sidebar-w: 260px;
 }
@@ -30,6 +31,7 @@
     --dg-upd: #5a4510;
     --dg-upd-fg: #ff9a92;
     --dg-cur: #f778ba;
+    --dg-path: #3fb950;
   }
 }
 :root[data-theme="dark"] {
@@ -46,6 +48,7 @@
   --dg-upd: #5a4510;
   --dg-upd-fg: #ff9a92;
   --dg-cur: #f778ba;
+  --dg-path: #3fb950;
 }
 
 * { box-sizing: border-box; }
@@ -194,6 +197,17 @@ figcaption { font-size: 0.85rem; color: var(--fg-muted); }
 .diagram .node.cur .bd { stroke: var(--dg-cur); stroke-width: 3; }
 .diagram .badge { fill: var(--dg-cur); }
 .diagram .badge-t { fill: #fff; font-size: 11px; font-weight: 700; }
+.diagram .vid { font-size: 15px; font-weight: 700; }
+.diagram .val.g { font-size: 14px; }
+.diagram .wt { font-size: 13px; fill: var(--fg-muted); }
+.diagram .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.diagram .edge line { stroke: var(--dg-line); stroke-width: 1.5; }
+.diagram .edge polygon { fill: var(--dg-line); }
+.diagram .edge.use line { stroke: var(--dg-path); stroke-width: 4; }
+.diagram .edge.use polygon { fill: var(--dg-path); }
+.diagram .edge.ref line { stroke-dasharray: 5 3; }
+.diagram .edge.cur line { stroke: var(--dg-cur); stroke-width: 3; }
+.diagram .edge.cur polygon { fill: var(--dg-cur); }
 .dg-controls { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
 .dg-controls button {
   border: 1px solid var(--border); border-radius: 6px;
@@ -216,6 +230,9 @@ figcaption { font-size: 0.85rem; color: var(--fg-muted); }
 .dg-legend .sw.upd { background: var(--dg-upd); }
 .dg-legend .sw.cur { border: 2px solid var(--dg-cur); }
 .dg-legend .sw.ref { border: 2px dashed var(--dg-cur); }
+.dg-legend .sw.e-use, .dg-legend .sw.e-cur { height: 0; border: 0; border-radius: 0; background: none; }
+.dg-legend .sw.e-use { border-top: 4px solid var(--dg-path); }
+.dg-legend .sw.e-cur { border-top: 3px solid var(--dg-cur); }
 
 /* ---- child cards ---- */
 .cards {

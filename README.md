@@ -10,7 +10,7 @@ algo-notes/
 ├── assets/
 │   ├── nav-data.js         ★ サイドバーの構成（ページを増やしたらここに追記）
 │   ├── site.js             ヘッダー・サイドバー・パンくず・子ページ一覧を生成
-│   ├── diagram.js          セグ木・BIT の図(SVG)をステップ表示
+│   ├── diagram.js          セグ木・BIT・配列・グラフの図(SVG)をステップ表示
 │   ├── icon.svg            サイトのアイコン（favicon・ヘッダーのロゴ）
 │   └── style.css
 ├── data-structure/index.html       分類ページ
@@ -21,6 +21,12 @@ algo-notes/
 │   └── suffix-array/index.html
 ├── search/index.html
 │   └── binary-search/index.html
+├── graph/index.html
+│   ├── bfs/index.html
+│   ├── dfs/index.html
+│   ├── 01-bfs/index.html
+│   ├── dijkstra/index.html
+│   └── bellman-ford/index.html
 ├── library/index.html              ライブラリ（コンテストで使う自作コード.各コード1行目に参照URL）
 └── _template/                      新しいページのひな形（GitHub Pages には公開されない）
     ├── page/index.html             アルゴリズムページ用
@@ -74,4 +80,4 @@ algo-notes/
 - 現在のページはハイライトされ、その祖先は自動で展開
 - ダーク/ライト切替（◐）、スマホ対応
 - コードの色付け（highlight.js）、数式（MathJax、`$...$` 記法）
-- セグ木・BIT の図（`diagram.js`）：`<figure class="diagram" data-diagram>` の中に JSON を書くと SVG で描画され、`steps` を2つ以上書くとクリックで1段階ずつ進む。書式は `assets/diagram.js` 冒頭のコメント参照
+- セグ木・BIT・配列・グラフの図（`diagram.js`）：`<figure class="diagram" data-diagram>` の中に JSON を書くと SVG で描画され、`steps` を2つ以上書くとクリックで1段階ずつ進む。書式は `assets/diagram.js` 冒頭のコメント参照

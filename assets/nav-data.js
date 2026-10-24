@@ -28,6 +28,18 @@ window.NAV_DATA = [
     ]
   },
   {
+    title: "グラフ",
+    path: "graph/",
+    desc: "グラフ探索と最短経路",
+    children: [
+      { title: "BFS（幅優先探索）", path: "graph/bfs/", desc: "重みなしグラフの最短距離を O(N+M)" },
+      { title: "DFS（深さ優先探索）", path: "graph/dfs/", desc: "行けるところまで進むグラフ探索" },
+      { title: "0-1 BFS", path: "graph/01-bfs/", desc: "重みが 0 か 1 のグラフの最短距離を O(N+M)" },
+      { title: "ダイクストラ法", path: "graph/dijkstra/", desc: "非負重みの最短経路を O((N+M) log N)" },
+      { title: "ベルマン-フォード法", path: "graph/bellman-ford/", desc: "負の重みを含む最短経路・負閉路の検出" }
+    ]
+  },
+  {
     title: "ライブラリ",
     path: "library/",
     desc: "コンテストで使う自作コード(参照URL付き)"

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dijkstra's Algorithm | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="graph/dijkstra/">
+
+<h1>Dijkstra's Algorithm（ダイクストラ法）</h1>
+<p class="lead">辺の重みが非負のグラフで,1つの始点から全頂点への最短距離を求めるアルゴリズムについて解説します.</p>
+
+<h2>ダイクストラ法について</h2>
+<p>ダイクストラ法は,「まだ確定していない頂点のうち,今わかっている距離が最小の頂点は,その距離で確定してよい」という性質を使って,始点に近い頂点から順に最短距離を確定させていく方法です.<br>
+距離が最小の頂点を<strong>優先度付きキュー(ヒープ)</strong>で取り出すことで,$O((N + M) \log N)$ で全頂点への最短距離が求まります.</p>
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>道路の長さや移動時間など,重みが 0 以上のグラフの最短経路</li>
+<li>頂点を (位置, 状態) に分けたグラフでの最小コスト</li>
+<li>最短経路の復元,最短経路上にある辺・頂点の判定</li>
+</ul>
+
+<p>頂点数を N,辺の数を M とします.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td>1つの始点から全頂点への最短距離(ヒープを使う)</td><td>$O((N + M) \log N)$</td></tr>
+<tr><td>1つの始点から全頂点への最短距離(ヒープを使わない)</td><td>$O(N^2)$</td></tr>
+<tr><td>最短経路の復元(1頂点分)</td><td>$O(N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>距離が最小の頂点から確定させる</h2>
+<p>手順は次のとおりです.<code>dist[v]</code> は「今わかっている,始点から v までの距離の最小値」です.</p>
+<ol>
+<li><code>dist[始点] = 0</code>,ほかは ∞ にして,(0, 始点) をヒープに入れる.</li>
+<li>ヒープから距離 d が最小の (d, v) を取り出す.d &gt; <code>dist[v]</code> なら古い情報なので飛ばす.</li>
+<li>v から重み w の辺で行ける頂点 nv について,d + w &lt; <code>dist[nv]</code> なら <code>dist[nv]</code> を更新して (dist[nv], nv) をヒープに入れる(この操作を<strong>緩和</strong>という).</li>
+<li>ヒープが空になるまで 2, 3 をくり返す.</li>
+</ol>
+
+<p>頂点 0 を始点として,1段階ずつ見てみます.辺の横の数字は重み,頂点の横の数字は今わかっている距離です.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{
+ "type": "graph",
+ "pos": [[0, 1], [1, 0], [1, 2], [2, 0], [2, 2], [3, 1]],
+ "edges": [[0, 1, 7], [0, 2, 2], [1, 2, 3], [1, 3, 4], [2, 4, 9], [3, 4, 1], [3, 5, 6], [4, 5, 2]],
+ "values": ["∞", "∞", "∞", "∞", "∞", "∞"],
+ "legend": [["cur", "取り出した頂点"], ["upd", "距離を更新した頂点"], ["use", "確定した頂点"], ["e-cur", "更新に使った辺"], ["e-use", "最短経路に使う辺"]],
+ "steps": [
+  {"text": "dist[0] = 0 にして (0, 0) をヒープに入れる.<br>heap = [(0, 0)]", "hl": {"upd": [0]}, "set": {"0": 0}},
+  {"text": "(0, 0) を取り出す.頂点 0 の距離 0 が確定.<br>0→1 で dist[1] = 7,0→2 で dist[2] = 2 に更新.<br>heap = [(2, 2), (7, 1)]", "hl": {"cur": [0], "use": [0], "upd": [1, 2]}, "set": {"1": 7, "2": 2}, "ehl": {"cur": ["0-1", "0-2"]}},
+  {"text": "最小の (2, 2) を取り出す.頂点 2 の距離 2 が確定.<br>2→1 で 2 + 3 = 5 &lt; 7 なので dist[1] = 5 に更新.2→4 で dist[4] = 11.<br>heap = [(5, 1), (7, 1), (11, 4)]", "hl": {"cur": [2], "use": [0, 2], "upd": [1, 4]}, "set": {"1": 5, "4": 11}, "ehl": {"cur": ["2-1", "2-4"]}},
+  {"text": "(5, 1) を取り出す.頂点 1 の距離 5 が確定.<br>1→3 で dist[3] = 9.<br>heap = [(7, 1), (9, 3), (11, 4)]", "hl": {"cur": [1], "use": [0, 2, 1], "upd": [3]}, "set": {"3": 9}, "ehl": {"cur": ["1-3"]}},
+  {"text": "(7, 1) を取り出すが,7 &gt; dist[1] = 5 なので古い情報.何もせず飛ばす.<br>heap = [(9, 3), (11, 4)]", "hl": {"cur": [1], "use": [0, 2, 1]}},
+  {"text": "(9, 3) を取り出す.頂点 3 の距離 9 が確定.<br>3→4 で 9 + 1 = 10 &lt; 11 なので dist[4] = 10.3→5 で dist[5] = 15.<br>heap = [(10, 4), (11, 4), (15, 5)]", "hl": {"cur": [3], "use": [0, 2, 1, 3], "upd": [4, 5]}, "set": {"4": 10, "5": 15}, "ehl": {"cur": ["3-4", "3-5"]}},
+  {"text": "(10, 4) を取り出す.頂点 4 の距離 10 が確定.<br>4→5 で 10 + 2 = 12 &lt; 15 なので dist[5] = 12.<br>heap = [(11, 4), (12, 5), (15, 5)]", "hl": {"cur": [4], "use": [0, 2, 1, 3, 4], "upd": [5]}, "set": {"5": 12}, "ehl": {"cur": ["4-5"]}},
+  {"text": "(11, 4) は古い情報なので飛ばす.(12, 5) を取り出し,頂点 5 の距離 12 が確定.<br>heap = [(15, 5)]", "hl": {"cur": [5], "use": [0, 2, 1, 3, 4, 5]}},
+  {"text": "(15, 5) も古い情報なので飛ばし,ヒープが空になって終了.<br>最短距離は [0, 5, 2, 9, 10, 12].緑の辺をたどると最短経路になる", "hl": {"use": [0, 1, 2, 3, 4, 5]}, "ehl": {"use": ["0-2", "2-1", "1-3", "3-4", "4-5"]}}
+ ]
+}
+</script>
+</figure>
+
+<h3>なぜ取り出した頂点の距離は確定してよいのか</h3>
+<p>ヒープから取り出した頂点 v の距離 d が,ほかのどの未確定の頂点の距離よりも小さいとします.<br>
+もし v へのもっと短い経路があるとすると,その経路はどこかで未確定の頂点 u を通るはずですが,u までの距離がすでに d 以上なので,そこから先の辺の重みが<strong>非負</strong>である限り,v に着くころには d 以上になってしまいます.<br>
+したがって d より短い経路はなく,v の距離は d で確定します.この議論は重みが負の辺があると成り立たないので,ダイクストラ法は負の重みには使えません.</p>
+
+<h3>なぜ $O((N + M) \log N)$ なのか</h3>
+<p>緩和に成功するたびにヒープに1つ入れるので,ヒープに入る要素は合計で高々 M + 1 個です.<br>
+ヒープへの出し入れはそれぞれ $O(\log M)$ で,$\log M \le \log N^2 = 2 \log N$ なので,全体で $O((N + M) \log N)$ になります.</p>
+
+<h3>注意点</h3>
+<ul>
+<li>負の重みの辺があると正しく求まりません.その場合は<a href="../bellman-ford/">ベルマン-フォード法</a>を使います.</li>
+<li>取り出した (d, v) が古い情報(d &gt; <code>dist[v]</code>)なら必ず飛ばします.飛ばさないと同じ頂点の辺を何度も見ることになり,計算量が悪化します.</li>
+<li>ヒープには (距離, 頂点) の順でタプルを入れます.Pythonのタプルは先頭の要素から比べられるので,距離の小さい順に取り出せます.</li>
+</ul>
+
+<h2>実装</h2>
+<p><code>heapq</code> を使って実装します.上の図と同じグラフです.</p>
+
+<pre><code class="language-python">from heapq import heappush, heappop
+
+N = 6
+edges = [(0, 1, 7), (0, 2, 2), (1, 2, 3), (1, 3, 4), (2, 4, 9), (3, 4, 1), (3, 5, 6), (4, 5, 2)]
+G = [[] for _ in range(N)]
+for u, v, w in edges:
+    G[u].append((v, w))
+    G[v].append((u, w))
+
+INF = float("inf")
+
+def dijkstra(s):
+    dist = [INF] * N
+    dist[s] = 0
+    hq = [(0, s)]  # (距離, 頂点)
+    while hq:
+        d, v = heappop(hq)  # 距離が最小のものを取り出す
+        if d &gt; dist[v]:  # 古い情報なら飛ばす
+            continue
+        for nv, w in G[v]:
+            if d + w &lt; dist[nv]:
+                dist[nv] = d + w
+                heappush(hq, (dist[nv], nv))
+    return dist
+
+print(dijkstra(0))</code></pre>
+<pre class="output"><code class="nohighlight">[0, 5, 2, 9, 10, 12]</code></pre>
+
+<h3>経路の復元</h3>
+<p>緩和に成功したときに「どの頂点から来たか」を <code>prev</code> に記録しておくと,ゴールから逆にたどって最短経路を復元できます.</p>
+
+<pre><code class="language-python">from heapq import heappush, heappop
+
+N = 6
+edges = [(0, 1, 7), (0, 2, 2), (1, 2, 3), (1, 3, 4), (2, 4, 9), (3, 4, 1), (3, 5, 6), (4, 5, 2)]
+G = [[] for _ in range(N)]
+for u, v, w in edges:
+    G[u].append((v, w))
+    G[v].append((u, w))
+
+INF = float("inf")
+dist = [INF] * N
+prev = [-1] * N
+dist[0] = 0
+hq = [(0, 0)]
+while hq:
+    d, v = heappop(hq)
+    if d &gt; dist[v]:
+        continue
+    for nv, w in G[v]:
+        if d + w &lt; dist[nv]:
+            dist[nv] = d + w
+            prev[nv] = v  # どこから来たかを記録
+            heappush(hq, (dist[nv], nv))
+
+path = []
+v = 5
+while v != -1:
+    path.append(v)
+    v = prev[v]
+print(dist[5], path[::-1])</code></pre>
+<pre class="output"><code class="nohighlight">12 [0, 2, 1, 3, 4, 5]</code></pre>
+
+<h3>辺が多いとき($O(N^2)$ のダイクストラ法)</h3>
+<p>ほぼすべての頂点の組に辺があるような密なグラフ(M が $N^2$ 程度)では,ヒープを使わずに「未確定の頂点の中から距離最小のものを毎回 $O(N)$ で探す」方が速くなります.<br>
+この場合の計算量は $O(N^2)$ で,ヒープ版の $O(N^2 \log N)$ より有利です.</p>
+
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) にはダイクストラ法のライブラリはありませんが,SciPy の <code>scipy.sparse.csgraph</code> に <code>dijkstra</code> があります.<br>
+<code>return_predecessors=True</code> にすると,経路の復元に使える「1つ前の頂点」の配列も返します.</p>
+
+<pre><code class="language-python">from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import dijkstra
+
+N = 6
+edges = [(0, 1, 7), (0, 2, 2), (1, 2, 3), (1, 3, 4), (2, 4, 9), (3, 4, 1), (3, 5, 6), (4, 5, 2)]
+row = [u for u, v, w in edges]
+col = [v for u, v, w in edges]
+data = [w for u, v, w in edges]
+G = csr_matrix((data, (row, col)), shape=(N, N))
+
+dist, pred = dijkstra(G, directed=False, indices=0, return_predecessors=True)
+print(dist)
+print(pred)</code></pre>
+<pre class="output"><code class="nohighlight">[ 0.  5.  2.  9. 10. 12.]
+[-9999     2     0     1     3     4]</code></pre>
+
+<p>結果は float の配列で,到達できない頂点は <code>inf</code>,<code>pred</code> の -9999 は「1つ前の頂点がない」という意味です.<br>
+<code>csr_matrix</code> は同じ頂点の組に辺が複数あると重みを<strong>足してしまう</strong>ので,多重辺があるときは最小の重みだけを残してから渡してください.</p>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>dijkstra(G, directed=True, indices=s)</code></td><td>s から全頂点への最短距離を返す</td><td>$O((N + M) \log N)$</td></tr>
+<tr><td><code>dijkstra(G, indices=s, return_predecessors=True)</code></td><td>最短距離と,各頂点の1つ前の頂点を返す</td><td>$O((N + M) \log N)$</td></tr>
+<tr><td><code>dijkstra(G, indices=s, limit=L)</code></td><td>距離が L 以下の頂点だけを調べる(それ以外は <code>inf</code>)</td><td>$O((N + M) \log N)$</td></tr>
+<tr><td><code>dijkstra(G, directed=True)</code></td><td>indices を省くと全頂点の組の最短距離($N \times N$ の配列)を返す</td><td>$O(N (N + M) \log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>ほかの最短経路アルゴリズムとの比較</h2>
+<p>辺の重みの性質によって,使えるアルゴリズムと計算量が変わります.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>アルゴリズム</th><th>扱える重み</th><th>求めるもの</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><a href="../bfs/">BFS</a></td><td>すべて同じ(重みなし)</td><td>1つの始点から</td><td>$O(N + M)$</td></tr>
+<tr><td><a href="../01-bfs/">0-1 BFS</a></td><td>0 か 1</td><td>1つの始点から</td><td>$O(N + M)$</td></tr>
+<tr><td>ダイクストラ法</td><td>0 以上</td><td>1つの始点から</td><td>$O((N + M) \log N)$</td></tr>
+<tr><td><a href="../bellman-ford/">ベルマン-フォード法</a></td><td>負もOK(負閉路の検出も可)</td><td>1つの始点から</td><td>$O(NM)$</td></tr>
+<tr><td>ワーシャル-フロイド法</td><td>負もOK(負閉路がないこと)</td><td>全頂点の組</td><td>$O(N^3)$</td></tr>
+</tbody>
+</table>
+</div>
+<p>重みが 0 以上ならまずダイクストラ法を考え,重みがすべて同じならBFS,0 か 1 なら 0-1 BFS,負の重みがあるならベルマン-フォード法を使います.</p>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

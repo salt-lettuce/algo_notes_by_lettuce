@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bellman-Ford Algorithm | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="graph/bellman-ford/">
+
+<h1>Bellman-Ford Algorithm（ベルマン-フォード法）</h1>
+<p class="lead">負の重みの辺を含むグラフで最短距離を求め,負閉路も検出できるアルゴリズムについて解説します.</p>
+
+<h2>ベルマン-フォード法について</h2>
+<p>ベルマン-フォード法は,「すべての辺について緩和(<code>dist[u] + w &lt; dist[v]</code> なら <code>dist[v]</code> を更新)する」という操作を,更新が起きなくなるまでくり返す方法です.<br>
+<a href="../dijkstra/">ダイクストラ法</a>より遅いですが,<strong>負の重みの辺</strong>があっても正しく動き,さらに<strong>負閉路</strong>(重みの和が負になるサイクル)があるかどうかも判定できます.</p>
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>負の重みの辺を含むグラフの最短距離</li>
+<li>負閉路の検出(負閉路を回り続けると距離をいくらでも小さくできる)</li>
+<li>得点を最大化する問題で,重みの符号を反転して最短距離の問題にしたもの</li>
+</ul>
+
+<p>頂点数を N,辺の数を M とします.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td>1つの始点から全頂点への最短距離</td><td>$O(NM)$</td></tr>
+<tr><td>始点から到達できる負閉路があるかの判定</td><td>$O(NM)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>すべての辺の緩和をくり返す</h2>
+<p>手順は次のとおりです.</p>
+<ol>
+<li><code>dist[始点] = 0</code>,ほかは ∞ にする.</li>
+<li>すべての辺 (u, v, w) について,<code>dist[u] + w &lt; dist[v]</code> なら <code>dist[v] = dist[u] + w</code> に更新する.これを1周とする.</li>
+<li>1周の間に1回も更新が起きなければ終了.</li>
+<li>N 周目でも更新が起きたら,負閉路があると判定して終了.</li>
+</ol>
+
+<p>次の有向グラフで,頂点 0 から1周ずつ見てみます.辺は (3→4), (1→3), (2→1), (0→2), (0→1), (2→4) の順に調べることにします.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{
+ "type": "graph",
+ "directed": true,
+ "pos": [[0, 1], [1, 0], [1, 2], [2, 0], [2, 2]],
+ "edges": [[3, 4, -2], [1, 3, 2], [2, 1, -3], [0, 2, 2], [0, 1, 4], [2, 4, 3]],
+ "values": ["∞", "∞", "∞", "∞", "∞"],
+ "legend": [["upd", "この周で更新した頂点"], ["e-cur", "この周で更新に使った辺"], ["e-use", "最短経路に使う辺"]],
+ "steps": [
+  {"text": "dist[0] = 0,ほかは ∞ にする", "hl": {"upd": [0]}, "set": {"0": 0}},
+  {"text": "1周目.(3→4), (1→3), (2→1) は出発点の距離が ∞ なので何もしない.<br>(0→2) で dist[2] = 2,(0→1) で dist[1] = 4,(2→4) で dist[4] = 2 + 3 = 5", "hl": {"upd": [2, 1, 4]}, "set": {"2": 2, "1": 4, "4": 5}, "ehl": {"cur": ["0-2", "0-1", "2-4"]}},
+  {"text": "2周目.(1→3) で dist[3] = 4 + 2 = 6.(2→1) で 2 − 3 = −1 &lt; 4 なので dist[1] = −1.<br>dist[3] は古い dist[1] = 4 を使って計算したので,まだ最短ではない", "hl": {"upd": [3, 1]}, "set": {"3": 6, "1": -1}, "ehl": {"cur": ["1-3", "2-1"]}},
+  {"text": "3周目.(3→4) で 6 − 2 = 4 &lt; 5 なので dist[4] = 4.(1→3) で −1 + 2 = 1 &lt; 6 なので dist[3] = 1", "hl": {"upd": [4, 3]}, "set": {"4": 4, "3": 1}, "ehl": {"cur": ["3-4", "1-3"]}},
+  {"text": "4周目.(3→4) で 1 − 2 = −1 &lt; 4 なので dist[4] = −1", "hl": {"upd": [4]}, "set": {"4": -1}, "ehl": {"cur": ["3-4"]}},
+  {"text": "5周目.どの辺でも更新が起きないので終了(負閉路はない).<br>最短距離は [0, −1, 2, 1, −1].緑の辺 0→2→1→3→4 が最短経路で,ちょうど N − 1 = 4 本の辺を使っている", "hl": {"use": [0, 1, 2, 3, 4]}, "ehl": {"use": ["0-2", "2-1", "1-3", "3-4"]}}
+ ]
+}
+</script>
+</figure>
+
+<h3>なぜ N − 1 周で十分なのか</h3>
+<p>負閉路がなければ,最短経路は同じ頂点を2回通らないので,辺の本数は高々 N − 1 本です.<br>
+k 周目が終わった時点で,「辺を k 本以下使う経路の中での最短距離」は必ず求まっています(1周ごとに,最短経路の辺を少なくとも1本先まで正しく伸ばせるため).<br>
+したがって N − 1 周で全頂点の最短距離が求まり,それ以降は更新が起きません.上の例のように辺を見る順番が悪いと,実際に N − 1 周ぎりぎりまでかかることもあります.</p>
+
+<h3>負閉路の検出</h3>
+<p>逆に,N 周目になっても更新が起きるなら,どこかに始点から到達できる負閉路があります.負閉路を1周するごとに距離が小さくなるので,更新が止まらないからです.<br>
+このとき「最短距離」は −∞ になり,求めることができません.</p>
+
+<h3>なぜ $O(NM)$ なのか</h3>
+<p>1周で M 本の辺を1回ずつ見て,最大 N 周するので $O(NM)$ です.ダイクストラ法よりかなり遅いので,負の重みがないときはダイクストラ法を使います.</p>
+
+<h2>実装</h2>
+<p>上の図と同じグラフで,頂点 0 からの距離を求めます.負閉路があるときは <code>None</code> を返します.<br>
+後半では 4→1 に重み −1 の辺を足して,1→3→4→1 の重みの和を 2 − 2 − 1 = −1 にしています.</p>
+
+<pre><code class="language-python">N = 5
+# (u, v, w) : u から v へ重み w の有向辺
+edges = [(3, 4, -2), (1, 3, 2), (2, 1, -3), (0, 2, 2), (0, 1, 4), (2, 4, 3)]
+
+INF = float("inf")
+
+def bellman_ford(s):
+    dist = [INF] * N
+    dist[s] = 0
+    for i in range(N):
+        updated = False
+        for u, v, w in edges:  # すべての辺を見る
+            if dist[u] != INF and dist[u] + w &lt; dist[v]:
+                dist[v] = dist[u] + w
+                updated = True
+        if not updated:  # 更新がなければ確定
+            return dist
+        if i == N - 1:  # N 周目でも更新された → 負閉路がある
+            return None
+    return dist
+
+print(bellman_ford(0))
+edges.append((4, 1, -1))  # 1 → 3 → 4 → 1 の重みの和が -1 になる辺を追加
+print(bellman_ford(0))</code></pre>
+<pre class="output"><code class="nohighlight">[0, -1, 2, 1, -1]
+None</code></pre>
+
+<h3>注意点</h3>
+<ul>
+<li><code>dist[u] != INF</code> の確認を忘れないようにします.∞ の頂点から緩和しないためです(<code>float("inf")</code> なら ∞ − 3 も ∞ なので結果は変わりませんが,INF を大きな整数にしているときは誤って更新されてしまいます).</li>
+<li>無向グラフで負の重みの辺があると,その辺を往復するだけで負閉路になってしまいます.負の重みは基本的に有向グラフで考えます.</li>
+<li>この方法で検出できるのは<strong>始点から到達できる</strong>負閉路だけです.グラフのどこかに負閉路があるかを調べたいときは,すべての頂点の dist を 0 にして始めます.</li>
+</ul>
+
+<h3>負閉路の影響を受ける頂点を求める</h3>
+<p>負閉路があっても,そこから到達できない頂点の最短距離は普通に求まります.<br>
+「ゴールまでの最短距離が −∞ になるか」を知りたいときは,2N 周まわして,N 周目以降に更新された頂点の距離を −∞ にします.−∞ は負閉路から到達できる頂点に伝わっていくので,影響を受ける頂点がすべてわかります.</p>
+
+<pre><code class="language-python">N = 6
+edges = [(0, 1, 1), (1, 2, 1), (2, 1, -3), (2, 3, 1), (0, 4, 2), (4, 5, 2)]
+INF = float("inf")
+
+dist = [INF] * N
+dist[0] = 0
+for i in range(2 * N):  # 2N 周まわす
+    for u, v, w in edges:
+        if dist[u] != INF and dist[u] + w &lt; dist[v]:
+            # N 周目以降に更新される頂点は,負閉路の影響を受けている
+            dist[v] = -INF if i &gt;= N - 1 else dist[u] + w
+
+print(dist)</code></pre>
+<pre class="output"><code class="nohighlight">[0, -inf, -inf, -inf, 2, 4]</code></pre>
+
+<p>1→2→1 が重みの和 −2 の負閉路なので,1, 2 とその先の 3 は −∞ になり,負閉路を通らない 4, 5 は普通に距離が求まっています.</p>
+
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) にはベルマン-フォード法のライブラリはありませんが,SciPy の <code>scipy.sparse.csgraph</code> に <code>bellman_ford</code> があります.<br>
+負閉路があるときは <code>NegativeCycleError</code> という例外が発生します.</p>
+
+<pre><code class="language-python">from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import bellman_ford, NegativeCycleError
+
+N = 5
+edges = [(3, 4, -2), (1, 3, 2), (2, 1, -3), (0, 2, 2), (0, 1, 4), (2, 4, 3)]
+row = [u for u, v, w in edges]
+col = [v for u, v, w in edges]
+data = [w for u, v, w in edges]
+G = csr_matrix((data, (row, col)), shape=(N, N))
+print(bellman_ford(G, directed=True, indices=0))
+
+G2 = csr_matrix((data + [-1], (row + [4], col + [1])), shape=(N, N))
+try:
+    bellman_ford(G2, directed=True, indices=0)
+except NegativeCycleError:
+    print("negative cycle")</code></pre>
+<pre class="output"><code class="nohighlight">[ 0. -1.  2.  1. -1.]
+negative cycle</code></pre>
+
+<p>SciPy の <code>bellman_ford</code> は負閉路があると例外を出して終わるので,上の「負閉路の影響を受ける頂点」のような処理が必要なときは自分で実装します.</p>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>bellman_ford(G, directed=True, indices=s)</code></td><td>s から全頂点への最短距離を返す(負閉路があれば <code>NegativeCycleError</code>)</td><td>$O(NM)$</td></tr>
+<tr><td><code>bellman_ford(G, indices=s, return_predecessors=True)</code></td><td>最短距離と,各頂点の1つ前の頂点を返す</td><td>$O(NM)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>ダイクストラ法との比較</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><a href="../dijkstra/">ダイクストラ法</a></th><th>ベルマン-フォード法</th></tr></thead>
+<tbody>
+<tr><td>扱える重み</td><td>0 以上</td><td>負もOK</td></tr>
+<tr><td>負閉路の検出</td><td>できない</td><td>できる</td></tr>
+<tr><td>計算量</td><td>$O((N + M) \log N)$</td><td>$O(NM)$</td></tr>
+<tr><td>距離を確定させる方法</td><td>距離が最小の頂点から1つずつ確定</td><td>全辺の緩和をくり返し,更新が止まったら確定</td></tr>
+</tbody>
+</table>
+</div>
+<p>負の重みがなければダイクストラ法,負の重みがある・負閉路を調べたいときはベルマン-フォード法を使います.</p>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

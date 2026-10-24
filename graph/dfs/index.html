@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depth-First Search | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="graph/dfs/">
+
+<h1>Depth-First Search (DFS)（深さ優先探索）</h1>
+<p class="lead">行けるところまで進んでから引き返す探索アルゴリズムについて解説します.</p>
+
+<h2>DFSについて</h2>
+<p>DFSは,今いる頂点の隣にまだ訪問していない頂点があればそこへ進み,進めなくなったら1つ前の頂点に戻って別の道を探す,という探索方法です.<br>
+迷路で「突き当たるまで進み,行き止まりなら分かれ道まで戻る」のと同じ動きで,再帰関数を使うと短く書けます.</p>
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>ある頂点からある頂点へ到達できるかの判定,連結成分の分解</li>
+<li>サイクル(閉路)の検出,トポロジカルソート</li>
+<li>木の部分木の大きさや深さなど,木の上での計算(木DP)</li>
+<li>全探索(順列や組合せを1つずつ作るバックトラック)</li>
+</ul>
+
+<p>頂点数を N,辺の数を M とします.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td>1つの始点から到達できる頂点をすべて訪問</td><td>$O(N + M)$</td></tr>
+<tr><td>連結成分の分解</td><td>$O(N + M)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>再帰による探索</h2>
+<p>DFSは次の関数 <code>dfs(v)</code> で表せます.</p>
+<ol>
+<li>v を訪問済みにする.</li>
+<li>v の隣の頂点 nv を順に見て,未訪問なら <code>dfs(nv)</code> を呼ぶ(そこから先を調べ終わるまで戻ってこない).</li>
+<li>隣をすべて見終わったら,呼び出し元に戻る.</li>
+</ol>
+<p>頂点 0 から始めたときの動きを1段階ずつ見てみます.頂点の横の数字は訪問した順番です.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{
+ "type": "graph",
+ "pos": [[0, 1], [1, 0], [1, 2], [2, 0], [2, 2], [3, 1], [4, 1]],
+ "edges": [[0, 1], [0, 2], [1, 2], [1, 3], [2, 4], [3, 5], [4, 5], [5, 6]],
+ "legend": [["cur", "今いる頂点"], ["rng", "呼び出し途中の頂点"], ["use", "調べ終わった頂点"], ["e-use", "進んだ辺"]],
+ "steps": [
+  {"text": "dfs(0) を呼ぶ.0 を訪問済みにする(1番目)", "hl": {"cur": [0]}, "set": {"0": 1}},
+  {"text": "0 の隣は [1, 2].1 は未訪問なので dfs(1) を呼ぶ(2番目)", "hl": {"cur": [1], "rng": [0]}, "set": {"1": 2}, "ehl": {"use": ["0-1"]}},
+  {"text": "1 の隣は [0, 2, 3].0 は訪問済みなので飛ばし,dfs(2) を呼ぶ(3番目)", "hl": {"cur": [2], "rng": [0, 1]}, "set": {"2": 3}, "ehl": {"use": ["0-1", "1-2"]}},
+  {"text": "2 の隣は [0, 1, 4].0, 1 は訪問済みなので dfs(4) を呼ぶ(4番目)", "hl": {"cur": [4], "rng": [0, 1, 2]}, "set": {"4": 4}, "ehl": {"use": ["0-1", "1-2", "2-4"]}},
+  {"text": "4 の隣は [2, 5].dfs(5) を呼ぶ(5番目)", "hl": {"cur": [5], "rng": [0, 1, 2, 4]}, "set": {"5": 5}, "ehl": {"use": ["0-1", "1-2", "2-4", "4-5"]}},
+  {"text": "5 の隣は [3, 4, 6].まず dfs(3) を呼ぶ(6番目)", "hl": {"cur": [3], "rng": [0, 1, 2, 4, 5]}, "set": {"3": 6}, "ehl": {"use": ["0-1", "1-2", "2-4", "4-5", "5-3"]}},
+  {"text": "3 の隣 [1, 5] はどちらも訪問済み.3 は調べ終わったので 5 に戻る", "hl": {"cur": [5], "rng": [0, 1, 2, 4], "use": [3]}, "ehl": {"use": ["0-1", "1-2", "2-4", "4-5", "5-3"]}},
+  {"text": "5 の続き.4 は訪問済みなので飛ばし,dfs(6) を呼ぶ(7番目)", "hl": {"cur": [6], "rng": [0, 1, 2, 4, 5], "use": [3]}, "set": {"6": 7}, "ehl": {"use": ["0-1", "1-2", "2-4", "4-5", "5-3", "5-6"]}},
+  {"text": "6 の隣 [5] は訪問済み.6 → 5 → 4 → 2 → 1 → 0 の順に調べ終わって戻り,探索終了.<br>辺 0-2, 1-3, 4-5 は使わなかった(行った先がすでに訪問済みだった)", "hl": {"use": [0, 1, 2, 3, 4, 5, 6]}, "ehl": {"use": ["0-1", "1-2", "2-4", "4-5", "5-3", "5-6"]}}
+ ]
+}
+</script>
+</figure>
+
+<p>同じグラフでも<a href="../bfs/">BFS</a>では 0 → 1, 2 → 3, 4 → … と近い順に広がっていましたが,DFSでは 0 → 1 → 2 → 4 → 5 → 3 と1本の道を深く進んでいきます.</p>
+
+<h3>行きがけ順と帰りがけ順</h3>
+<p>DFSでは,頂点を訪問したタイミング(<strong>行きがけ</strong>)と,その頂点から先をすべて調べ終わったタイミング(<strong>帰りがけ</strong>)の2つで処理を書けます.</p>
+<ul>
+<li>行きがけ順:上の図の番号の順.0, 1, 2, 4, 5, 3, 6</li>
+<li>帰りがけ順:調べ終わった順.3, 6, 5, 4, 2, 1, 0</li>
+</ul>
+<p>木の上で「子の結果を使って親の値を決める」計算(部分木の大きさなど)は,帰りがけのタイミングで行います.<br>
+また,有向グラフ(サイクルなし)で帰りがけ順を逆にすると<strong>トポロジカル順序</strong>になります.</p>
+
+<h3>なぜ $O(N + M)$ なのか</h3>
+<p><code>dfs(v)</code> は訪問済みの頂点に対しては呼ばれないので,各頂点について高々1回しか呼ばれません.<br>
+1回の呼び出しの中では v から出る辺を1回ずつ見るので,全体で $O(N + M)$ です.</p>
+
+<h2>実装</h2>
+<p>再帰関数で書くと次のようになります.上の図と同じグラフです.</p>
+
+<pre><code class="language-python">import sys
+sys.setrecursionlimit(10**6)
+
+N = 7
+edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 5), (4, 5), (5, 6)]
+G = [[] for _ in range(N)]
+for u, v in edges:
+    G[u].append(v)
+    G[v].append(u)
+
+visited = [False] * N
+order = []  # 行きがけ順(訪問した順)
+post = []   # 帰りがけ順(調べ終わった順)
+
+def dfs(v):
+    visited[v] = True
+    order.append(v)
+    for nv in G[v]:
+        if not visited[nv]:
+            dfs(nv)  # 行けるところまで進む
+    post.append(v)  # ここに来たら v から先は調べ終わり
+
+dfs(0)
+print(order)
+print(post)</code></pre>
+<pre class="output"><code class="nohighlight">[0, 1, 2, 4, 5, 3, 6]
+[3, 6, 5, 4, 2, 1, 0]</code></pre>
+
+<h3>注意点:再帰の深さ</h3>
+<ul>
+<li>Pythonの再帰の深さは標準で 1000 程度までなので,<code>sys.setrecursionlimit</code> で上限を上げておく必要があります.</li>
+<li>一直線のグラフのように再帰が深くなる場合,上限を上げてもPythonでは遅かったり,スタックが足りずに落ちたりすることがあります(PyPy では特に遅くなりやすい).</li>
+<li>その場合は次のように,再帰を使わずスタック(リスト)で書きます.</li>
+</ul>
+
+<h3>スタックを使った実装</h3>
+<p>取り出したときに訪問済みなら飛ばし,隣の頂点を<strong>逆順に</strong>積むと,再帰と同じ行きがけ順になります.</p>
+
+<pre><code class="language-python">N = 7
+edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 5), (4, 5), (5, 6)]
+G = [[] for _ in range(N)]
+for u, v in edges:
+    G[u].append(v)
+    G[v].append(u)
+
+visited = [False] * N
+order = []
+stack = [0]
+while stack:
+    v = stack.pop()  # 末尾から取り出す
+    if visited[v]:
+        continue
+    visited[v] = True
+    order.append(v)
+    for nv in reversed(G[v]):  # 逆順に積むと再帰と同じ順番になる
+        if not visited[nv]:
+            stack.append(nv)
+
+print(order)</code></pre>
+<pre class="output"><code class="nohighlight">[0, 1, 2, 4, 5, 3, 6]</code></pre>
+
+<p>なお,この書き方では帰りがけのタイミングがわからないので,帰りがけ順が必要なときは「頂点 v を積む前に,v の帰りがけを表す印(例えば <code>~v</code>)を積んでおく」などの工夫が必要です.</p>
+
+<h3>連結成分の分解</h3>
+<p>まだどの成分にも属していない頂点から探索を始め,たどり着いた頂点に同じ番号を付けていくと,グラフを連結成分に分けられます.<br>
+到達できる頂点を集めるだけなので,訪問の順番は気にしなくてよく,「積むときに印を付ける」簡単な書き方で十分です.</p>
+
+<pre><code class="language-python">N = 8
+edges = [(0, 1), (1, 2), (3, 4), (5, 6), (6, 7), (7, 5)]
+G = [[] for _ in range(N)]
+for u, v in edges:
+    G[u].append(v)
+    G[v].append(u)
+
+comp = [-1] * N  # comp[v] : v が属する連結成分の番号
+cnt = 0
+for s in range(N):
+    if comp[s] != -1:
+        continue
+    stack = [s]
+    comp[s] = cnt
+    while stack:
+        v = stack.pop()
+        for nv in G[v]:
+            if comp[nv] == -1:
+                comp[nv] = cnt
+                stack.append(nv)
+    cnt += 1
+
+print(cnt)
+print(comp)</code></pre>
+<pre class="output"><code class="nohighlight">3
+[0, 0, 0, 1, 1, 2, 2, 2]</code></pre>
+
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) にはDFSのライブラリはありませんが,SciPy の <code>scipy.sparse.csgraph</code> にDFSの訪問順や連結成分を求める関数があります.</p>
+
+<pre><code class="language-python">from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import depth_first_order, connected_components
+
+N = 7
+edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 5), (4, 5), (5, 6)]
+row = [u for u, v in edges]
+col = [v for u, v in edges]
+G = csr_matrix(([1] * len(edges), (row, col)), shape=(N, N))
+
+order, pred = depth_first_order(G, 0, directed=False)
+print(order)
+print(pred)
+
+H = csr_matrix(([1] * 6, ([0, 1, 3, 5, 6, 7], [1, 2, 4, 6, 7, 5])), shape=(8, 8))
+print(connected_components(H, directed=False))</code></pre>
+<pre class="output"><code class="nohighlight">[0 1 2 4 5 6 3]
+[-9999     0     1     5     2     4     5]
+(3, array([0, 0, 0, 1, 1, 2, 2, 2], dtype=int32))</code></pre>
+
+<p><code>depth_first_order</code> の訪問順は内部の実装によって決まるので,自分で書いた再帰のDFSと一致するとは限りません(この例でも 6 と 3 の順番が違います).訪問の順番そのものが答えに関わる問題では自分で実装します.</p>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>depth_first_order(G, s, directed=True)</code></td><td>s からDFSで訪問した順と,各頂点の1つ前の頂点を返す</td><td>$O(N + M)$</td></tr>
+<tr><td><code>connected_components(G, directed=True)</code></td><td>連結成分の個数と,各頂点の成分番号を返す</td><td>$O(N + M)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>BFSとの比較</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th><a href="../bfs/">BFS</a></th><th>DFS</th></tr></thead>
+<tbody>
+<tr><td>使う入れ物</td><td>キュー(先入れ先出し)</td><td>スタック(後入れ先出し)または再帰</td></tr>
+<tr><td>訪問の順番</td><td>始点に近い順</td><td>行けるところまで進んでから戻る</td></tr>
+<tr><td>重みなし最短距離</td><td>求められる</td><td>求められない</td></tr>
+<tr><td>帰りがけの処理</td><td>書きにくい</td><td>自然に書ける</td></tr>
+<tr><td>向いている問題</td><td>最短距離・最短手数</td><td>連結判定,サイクル検出,トポロジカルソート,木DP</td></tr>
+</tbody>
+</table>
+</div>
+<p>到達できるかどうかや連結成分を調べるだけならどちらでもよく,最短距離ならBFS,帰りがけの処理や木の上の計算が必要ならDFSを使います.</p>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

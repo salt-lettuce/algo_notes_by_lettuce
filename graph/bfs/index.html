@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breadth-First Search | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="graph/bfs/">
+
+<h1>Breadth-First Search (BFS)（幅優先探索）</h1>
+<p class="lead">始点から近い頂点の順にグラフを調べていく探索アルゴリズムについて解説します.</p>
+
+<h2>BFSについて</h2>
+<p>BFSは,始点から「1本の辺でたどり着ける頂点」→「2本でたどり着ける頂点」→ … のように,始点に近い順に頂点を訪問していく探索方法です.<br>
+近い順に訪問するので,<strong>辺に重みがない(すべて1の)グラフ</strong>では,はじめて訪問したときの辺の本数がそのまま最短距離になります.</p>
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>重みなしグラフの,1つの始点から全頂点への最短距離</li>
+<li>迷路(グリッド)の最短手数</li>
+<li>連結成分の判定や,二部グラフの判定</li>
+</ul>
+
+<p>頂点数を N,辺の数を M とします.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td>1つの始点から全頂点への最短距離(重みなし)</td><td>$O(N + M)$</td></tr>
+<tr><td>最短経路の復元(1頂点分)</td><td>$O(N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>キューを使った探索</h2>
+<p>BFSでは,これから調べる頂点を<strong>キュー</strong>(先に入れたものから先に出てくる入れ物)で管理します.</p>
+<ol>
+<li>始点の距離を 0 にして,キューに入れる.</li>
+<li>キューの先頭から頂点 v を取り出す.</li>
+<li>v の隣の頂点のうち,まだ距離が決まっていないものの距離を「v の距離 + 1」にして,キューの末尾に入れる.</li>
+<li>キューが空になるまで 2, 3 をくり返す.</li>
+</ol>
+<p>キューには距離 d の頂点がすべて入ったあとに距離 d+1 の頂点が入るので,取り出される頂点の距離は 0, 1, 1, 2, 2, … と小さい順に並びます.<br>
+そのため,ある頂点にはじめて到達したときの距離が最短距離であり,あとから見つけた経路で書き換える必要はありません.</p>
+
+<p>頂点 0 を始点として,BFSを1段階ずつ見てみます.頂点の横の数字は距離(-1 は未訪問)です.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{
+ "type": "graph",
+ "pos": [[0, 1], [1, 0], [1, 2], [2, 0], [2, 2], [3, 1], [4, 1]],
+ "edges": [[0, 1], [0, 2], [1, 2], [1, 3], [2, 4], [3, 5], [4, 5], [5, 6]],
+ "values": [-1, -1, -1, -1, -1, -1, -1],
+ "legend": [["cur", "取り出した頂点"], ["upd", "距離が決まった頂点"], ["use", "調べ終わった頂点"], ["e-use", "はじめて到達したときに通った辺"]],
+ "steps": [
+  {"text": "始点 0 の距離を 0 にしてキューに入れる.<br>queue = [0]", "hl": {"upd": [0]}, "set": {"0": 0}},
+  {"text": "0 を取り出す.隣の 1, 2 は未訪問なので距離を 0 + 1 = 1 にして末尾に入れる.<br>queue = [1, 2]", "hl": {"cur": [0], "upd": [1, 2]}, "set": {"1": 1, "2": 1}, "ehl": {"use": ["0-1", "0-2"]}},
+  {"text": "1 を取り出す.0, 2 は訪問済みなので飛ばし,3 の距離を 2 にする.<br>queue = [2, 3]", "hl": {"cur": [1], "use": [0], "upd": [3]}, "set": {"3": 2}, "ehl": {"use": ["0-1", "0-2", "1-3"]}},
+  {"text": "2 を取り出す.4 の距離を 2 にする.<br>queue = [3, 4]", "hl": {"cur": [2], "use": [0, 1], "upd": [4]}, "set": {"4": 2}, "ehl": {"use": ["0-1", "0-2", "1-3", "2-4"]}},
+  {"text": "3 を取り出す.5 の距離を 3 にする.<br>queue = [4, 5]", "hl": {"cur": [3], "use": [0, 1, 2], "upd": [5]}, "set": {"5": 3}, "ehl": {"use": ["0-1", "0-2", "1-3", "2-4", "3-5"]}},
+  {"text": "4 を取り出す.5 はすでに距離 3 が決まっているので何もしない.<br>queue = [5]", "hl": {"cur": [4], "use": [0, 1, 2, 3]}, "ehl": {"use": ["0-1", "0-2", "1-3", "2-4", "3-5"]}},
+  {"text": "5 を取り出す.6 の距離を 4 にする.<br>queue = [6]", "hl": {"cur": [5], "use": [0, 1, 2, 3, 4], "upd": [6]}, "set": {"6": 4}, "ehl": {"use": ["0-1", "0-2", "1-3", "2-4", "3-5", "5-6"]}},
+  {"text": "6 を取り出す.新しく見つかる頂点はなく,キューが空になったので終了.<br>緑の辺だけをたどると,どの頂点にも始点から最短でたどり着ける(BFS木)", "hl": {"use": [0, 1, 2, 3, 4, 5, 6]}, "ehl": {"use": ["0-1", "0-2", "1-3", "2-4", "3-5", "5-6"]}}
+ ]
+}
+</script>
+</figure>
+
+<h3>なぜ $O(N + M)$ なのか</h3>
+<p>各頂点はキューに高々1回しか入らず,取り出したときにその頂点から出る辺を1回ずつ見ます.<br>
+頂点の取り出しが合計 N 回,辺を見る回数が合計 M 回(無向グラフでは両向きで 2M 回)なので,全体で $O(N + M)$ です.</p>
+
+<h3>注意点</h3>
+<ul>
+<li>キューには <code>collections.deque</code> を使います.<code>list.pop(0)</code> は $O(N)$ かかるので遅くなります.</li>
+<li>距離を決めるのは「キューに入れるとき」です.取り出すときに決めると,同じ頂点が何度もキューに入ってしまいます.</li>
+<li>辺に重みがある場合はBFSでは最短距離を求められません.重みが 0 か 1 なら<a href="../01-bfs/">0-1 BFS</a>,非負なら<a href="../dijkstra/">ダイクストラ法</a>を使います.</li>
+</ul>
+
+<h2>実装</h2>
+<p>グラフは<strong>隣接リスト</strong>(<code>G[v]</code> に v の隣の頂点を並べたリスト)で持ちます.上の図と同じグラフで,頂点 0 からの距離を求めます.</p>
+
+<pre><code class="language-python">from collections import deque
+
+N = 7
+edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 5), (4, 5), (5, 6)]
+G = [[] for _ in range(N)]
+for u, v in edges:
+    G[u].append(v)
+    G[v].append(u)
+
+def bfs(s):
+    dist = [-1] * N  # -1 は未訪問
+    dist[s] = 0
+    que = deque([s])
+    while que:
+        v = que.popleft()  # 先頭から取り出す
+        for nv in G[v]:
+            if dist[nv] == -1:  # はじめて見つけた頂点だけ
+                dist[nv] = dist[v] + 1
+                que.append(nv)  # 末尾に入れる
+    return dist
+
+print(bfs(0))</code></pre>
+<pre class="output"><code class="nohighlight">[0, 1, 1, 2, 2, 3, 4]</code></pre>
+
+<h3>経路の復元</h3>
+<p>距離だけでなく経路そのものが欲しいときは,距離を決めたときに「どの頂点から来たか」を <code>prev</code> に記録しておきます.<br>
+ゴールから <code>prev</code> をたどって始点まで戻り,最後に逆順にすれば最短経路になります.</p>
+
+<pre><code class="language-python">from collections import deque
+
+N = 7
+edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 5), (4, 5), (5, 6)]
+G = [[] for _ in range(N)]
+for u, v in edges:
+    G[u].append(v)
+    G[v].append(u)
+
+dist = [-1] * N
+prev = [-1] * N  # prev[v] : v の1つ前の頂点
+dist[0] = 0
+que = deque([0])
+while que:
+    v = que.popleft()
+    for nv in G[v]:
+        if dist[nv] == -1:
+            dist[nv] = dist[v] + 1
+            prev[nv] = v
+            que.append(nv)
+
+# 6 から prev をたどって 0 まで戻り,逆順にする
+path = []
+v = 6
+while v != -1:
+    path.append(v)
+    v = prev[v]
+print(path[::-1])</code></pre>
+<pre class="output"><code class="nohighlight">[0, 1, 3, 5, 6]</code></pre>
+
+<h3>グリッドでのBFS</h3>
+<p>迷路のようなグリッドでは,マス (i, j) を頂点,上下左右の移動を辺とみなします.隣接リストを作らず,その場で4方向を調べればよいです.<br>
+次の例は,左上の S から G までの最短手数を求めています(<code>#</code> は壁).</p>
+
+<pre><code class="language-python">from collections import deque
+
+S = ["S.#..",
+     ".##.#",
+     "...#G",
+     ".#...",
+     "....."]
+H, W = len(S), len(S[0])
+
+dist = [[-1] * W for _ in range(H)]
+dist[0][0] = 0
+que = deque([(0, 0)])
+while que:
+    i, j = que.popleft()
+    for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        ni, nj = i + di, j + dj
+        if 0 &lt;= ni &lt; H and 0 &lt;= nj &lt; W and S[ni][nj] != "#" and dist[ni][nj] == -1:
+            dist[ni][nj] = dist[i][j] + 1
+            que.append((ni, nj))
+
+print(dist[2][4])</code></pre>
+<pre class="output"><code class="nohighlight">8</code></pre>
+
+<h2>ライブラリでの実装</h2>
+<p>AtCoder Library (ACL) にはBFSのライブラリはありませんが,SciPy の <code>scipy.sparse.csgraph</code> にグラフ探索の関数があります.<br>
+グラフは隣接リストではなく,<code>csr_matrix</code>(疎行列)で渡します.<code>directed=False</code> にすると無向グラフとして扱われるので,辺は片方向だけ入れれば十分です.</p>
+
+<pre><code class="language-python">from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import breadth_first_order, dijkstra
+
+N = 7
+edges = [(0, 1), (0, 2), (1, 2), (1, 3), (2, 4), (3, 5), (4, 5), (5, 6)]
+row = [u for u, v in edges]
+col = [v for u, v in edges]
+G = csr_matrix(([1] * len(edges), (row, col)), shape=(N, N))
+
+order, pred = breadth_first_order(G, 0, directed=False)
+print(order)  # 訪問した順
+print(pred)   # 1つ前の頂点 (始点は -9999)
+print(dijkstra(G, directed=False, indices=0, unweighted=True))  # 距離</code></pre>
+<pre class="output"><code class="nohighlight">[0 1 2 3 4 5 6]
+[-9999     0     0     1     2     3     5]
+[0. 1. 1. 2. 2. 3. 4.]</code></pre>
+
+<p><code>breadth_first_order</code> は距離を返さないので,距離が欲しいときは <code>dijkstra</code> に <code>unweighted=True</code> を付けて辺の重みを無視させます.結果は float の配列で,到達できない頂点は <code>inf</code> になります.</p>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>csr_matrix((data, (row, col)), shape=(N, N))</code></td><td>辺のリストから疎行列のグラフを作る(同じ辺が複数あると値が足される)</td><td>$O(N + M)$</td></tr>
+<tr><td><code>breadth_first_order(G, s, directed=True)</code></td><td>s からBFSで訪問した順と,各頂点の1つ前の頂点を返す</td><td>$O(N + M)$</td></tr>
+<tr><td><code>dijkstra(G, directed=True, indices=s, unweighted=True)</code></td><td>重みを無視した s からの最短距離を返す</td><td>$O((N + M) \log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>DFSとの比較</h2>
+<p>BFSとDFSはどちらも全頂点を $O(N + M)$ で訪問しますが,訪問する順番が違います.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th></th><th>BFS</th><th><a href="../dfs/">DFS</a></th></tr></thead>
+<tbody>
+<tr><td>使う入れ物</td><td>キュー(先入れ先出し)</td><td>スタック(後入れ先出し)または再帰</td></tr>
+<tr><td>訪問の順番</td><td>始点に近い順</td><td>行けるところまで進んでから戻る</td></tr>
+<tr><td>重みなし最短距離</td><td>求められる</td><td>求められない</td></tr>
+<tr><td>向いている問題</td><td>最短距離・最短手数</td><td>連結判定,サイクル検出,木の上の計算など</td></tr>
+</tbody>
+</table>
+</div>
+<p>到達できるかどうかを調べるだけならどちらでもよく,最短距離が必要ならBFSを使います.</p>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>

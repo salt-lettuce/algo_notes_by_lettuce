@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0-1 BFS | Algorithm Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="../../assets/icon.svg">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-root="../../" data-path="graph/01-bfs/">
+
+<h1>0-1 BFS（0-1 幅優先探索）</h1>
+<p class="lead">辺の重みが 0 か 1 のグラフで最短距離を求めるアルゴリズムについて解説します.</p>
+
+<h2>0-1 BFSについて</h2>
+<p>0-1 BFSは,<a href="../bfs/">BFS</a>のキューを<strong>両端キュー(deque)</strong>に変え,重み 0 の辺で進んだ頂点は先頭に,重み 1 の辺で進んだ頂点は末尾に入れる方法です.<br>
+重みが 0 か 1 のときに限り,<a href="../dijkstra/">ダイクストラ法</a>と同じ結果を,優先度付きキューを使わずに $O(N + M)$ で求めることができます.</p>
+
+<p>代表的な使い道は次のとおりです.</p>
+<ul>
+<li>迷路で「壁を壊すのにコスト 1,普通の移動はコスト 0」のような問題</li>
+<li>「向きを変えるときだけコスト 1」のような,操作の一部だけにコストがかかる移動</li>
+<li>頂点を (位置, 状態) に分けたグラフで,状態の切り替えだけにコストがかかる問題</li>
+</ul>
+
+<p>頂点数を N,辺の数を M とします.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>BFS</th><th>0-1 BFS</th><th>ダイクストラ法</th></tr></thead>
+<tbody>
+<tr><td>扱える重み</td><td>すべて同じ</td><td>0 か 1</td><td>0 以上</td></tr>
+<tr><td>1つの始点から全頂点への最短距離</td><td>$O(N + M)$</td><td>$O(N + M)$</td><td>$O((N + M) \log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>dequeの先頭と末尾を使い分ける</h2>
+<p>手順は次のとおりです.</p>
+<ol>
+<li>始点の距離を 0 にして deque に入れる.</li>
+<li>deque の先頭から頂点 v を取り出す.v がすでに確定済みなら飛ばし,そうでなければ確定させる.</li>
+<li>v から重み w の辺で行ける頂点 nv について,<code>dist[v] + w</code> が今の <code>dist[nv]</code> より小さければ更新し,w = 0 なら<strong>先頭</strong>に,w = 1 なら<strong>末尾</strong>に入れる.</li>
+<li>deque が空になるまで 2, 3 をくり返す.</li>
+</ol>
+<p>重み 0 の辺で進んだ頂点は v と同じ距離なので,ほかの頂点より先に調べたい → 先頭に入れる.重み 1 なら距離が1増えるので後回し → 末尾に入れる,という考え方です.<br>
+こうすると deque の中身はつねに「先頭側に距離 d の頂点,末尾側に距離 d+1 の頂点」と距離の小さい順に並ぶので,先頭から取り出すだけで距離が最小の頂点を選べます.</p>
+
+<p>頂点 0 を始点として,1段階ずつ見てみます.辺の横の数字は重み,頂点の横の数字は今わかっている距離です.</p>
+
+<figure class="diagram" data-diagram>
+<script type="application/json">
+{
+ "type": "graph",
+ "pos": [[0, 1], [1, 0], [1, 2], [2, 0], [2, 2], [3, 1]],
+ "edges": [[0, 1, 1], [0, 2, 0], [1, 2, 0], [1, 3, 1], [2, 4, 1], [3, 5, 0], [4, 5, 1]],
+ "values": ["∞", "∞", "∞", "∞", "∞", "∞"],
+ "legend": [["cur", "取り出した頂点"], ["upd", "距離を更新した頂点"], ["use", "確定した頂点"], ["e-cur", "更新に使った辺"], ["e-use", "最短経路に使う辺"]],
+ "steps": [
+  {"text": "始点 0 の距離を 0 にして deque に入れる.<br>deque = [0]", "hl": {"upd": [0]}, "set": {"0": 0}},
+  {"text": "0 を取り出して確定.0→1 (重み 1) で dist[1] = 1 にして<strong>末尾</strong>へ,0→2 (重み 0) で dist[2] = 0 にして<strong>先頭</strong>へ.<br>deque = [2, 1]", "hl": {"cur": [0], "use": [0], "upd": [1, 2]}, "set": {"1": 1, "2": 0}, "ehl": {"cur": ["0-1", "0-2"]}},
+  {"text": "先頭の 2 を取り出して確定.2→1 (重み 0) で dist[1] = 0 + 0 = 0 &lt; 1 なので更新して先頭へ.2→4 (重み 1) で dist[4] = 1 にして末尾へ.<br>deque = [1, 1, 4]", "hl": {"cur": [2], "use": [0, 2], "upd": [1, 4]}, "set": {"1": 0, "4": 1}, "ehl": {"cur": ["2-1", "2-4"]}},
+  {"text": "1 を取り出して確定.1→3 (重み 1) で dist[3] = 1 にして末尾へ.<br>deque = [1, 4, 3]", "hl": {"cur": [1], "use": [0, 2, 1], "upd": [3]}, "set": {"3": 1}, "ehl": {"cur": ["1-3"]}},
+  {"text": "また 1 が出てきたが,すでに確定済みなので飛ばす(距離 1 だったころに末尾に入れたもの).<br>deque = [4, 3]", "hl": {"cur": [1], "use": [0, 2, 1]}},
+  {"text": "4 を取り出して確定.4→5 (重み 1) で dist[5] = 2 にして末尾へ.<br>deque = [3, 5]", "hl": {"cur": [4], "use": [0, 2, 1, 4], "upd": [5]}, "set": {"5": 2}, "ehl": {"cur": ["4-5"]}},
+  {"text": "3 を取り出して確定.3→5 (重み 0) で dist[5] = 1 + 0 = 1 &lt; 2 なので更新して先頭へ.<br>deque = [5, 5]", "hl": {"cur": [3], "use": [0, 2, 1, 4, 3], "upd": [5]}, "set": {"5": 1}, "ehl": {"cur": ["3-5"]}},
+  {"text": "5 を取り出して確定.更新できる頂点はない.<br>deque = [5]", "hl": {"cur": [5], "use": [0, 2, 1, 4, 3, 5]}},
+  {"text": "最後の 5 は確定済みなので飛ばし,deque が空になって終了.<br>最短距離は [0, 0, 0, 1, 1, 1]", "hl": {"use": [0, 1, 2, 3, 4, 5]}, "ehl": {"use": ["0-2", "2-1", "1-3", "2-4", "3-5"]}}
+ ]
+}
+</script>
+</figure>
+
+<h3>なぜ $O(N + M)$ なのか</h3>
+<p>頂点が deque に入るのは距離が更新されたときだけなので,入る回数は合計で高々 M + 1 回です.<br>
+確定済みの頂点は取り出してもすぐ飛ばすので,辺を見るのは各頂点につき1回(合計 M 回)です.deque の先頭・末尾への出し入れはどちらも $O(1)$ なので,全体で $O(N + M)$ になります.</p>
+
+<h3>注意点</h3>
+<ul>
+<li>BFSと違い,<strong>はじめて見つけたときの距離が最短とは限りません</strong>(上の例の頂点 1, 5).そのため「距離が小さくなったら更新する」形で書きます.</li>
+<li>同じ頂点が deque に複数回入ることがあるので,確定済みの頂点は取り出したときに飛ばします.</li>
+<li>重みが 0, 1 以外(例えば 0 と 2)のときはそのままでは使えません.一般の非負の重みには<a href="../dijkstra/">ダイクストラ法</a>を使います.</li>
+</ul>
+
+<h2>実装</h2>
+<p>上の図と同じグラフで,頂点 0 からの距離を求めます.</p>
+
+<pre><code class="language-python">from collections import deque
+
+N = 6
+edges = [(0, 1, 1), (0, 2, 0), (1, 2, 0), (1, 3, 1), (2, 4, 1), (3, 5, 0), (4, 5, 1)]
+G = [[] for _ in range(N)]
+for u, v, w in edges:
+    G[u].append((v, w))
+    G[v].append((u, w))
+
+INF = float("inf")
+
+def bfs01(s):
+    dist = [INF] * N
+    done = [False] * N
+    dist[s] = 0
+    que = deque([s])
+    while que:
+        v = que.popleft()
+        if done[v]:  # 確定済みなら飛ばす
+            continue
+        done[v] = True
+        for nv, w in G[v]:
+            if dist[v] + w &lt; dist[nv]:
+                dist[nv] = dist[v] + w
+                if w == 0:
+                    que.appendleft(nv)  # 重み 0 は先頭へ
+                else:
+                    que.append(nv)      # 重み 1 は末尾へ
+    return dist
+
+print(bfs01(0))</code></pre>
+<pre class="output"><code class="nohighlight">[0, 0, 0, 1, 1, 1]</code></pre>
+
+<h3>グリッドでの0-1 BFS</h3>
+<p>よく出る形は「普通のマスへの移動はコスト 0,壁 <code>#</code> を壊して進むとコスト 1」のようなグリッドの問題です.<br>
+移動先のマスによって重み w を決め,あとは同じように先頭・末尾を使い分けます.</p>
+
+<pre><code class="language-python">from collections import deque
+
+# 壁 "#" を壊すのにコスト 1 かかるときの,左上から右下への最小コスト
+S = ["..#..",
+     "###.#",
+     "..#..",
+     ".###.",
+     "...#."]
+H, W = len(S), len(S[0])
+INF = float("inf")
+
+dist = [[INF] * W for _ in range(H)]
+dist[0][0] = 0
+que = deque([(0, 0)])
+while que:
+    i, j = que.popleft()
+    for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        ni, nj = i + di, j + dj
+        if not (0 &lt;= ni &lt; H and 0 &lt;= nj &lt; W):
+            continue
+        w = 1 if S[ni][nj] == "#" else 0
+        if dist[i][j] + w &lt; dist[ni][nj]:
+            dist[ni][nj] = dist[i][j] + w
+            if w == 0:
+                que.appendleft((ni, nj))
+            else:
+                que.append((ni, nj))
+
+print(dist[H - 1][W - 1])</code></pre>
+<pre class="output"><code class="nohighlight">1</code></pre>
+
+<p>右上の壁 (0, 2) を1つ壊せば,あとは壁を通らずに右下まで行けるので答えは 1 です.<br>
+この書き方では確定済みの判定を省いています.距離が小さくなるときだけ更新するので答えは正しく求まり,同じマスを何度か調べ直すことがあっても,各マスから出る辺は4本しかないので計算量は $O(HW)$ のままです.</p>
+
+<h2>ライブラリでの実装</h2>
+<p>0-1 BFS専用のライブラリはありませんが,重みが 0 か 1 のグラフは非負重みのグラフなので,SciPy の <code>dijkstra</code> でも最短距離を求められます.<br>
+計算量は $O((N + M) \log N)$ になり,0-1 BFSより少し遅くなります.</p>
+
+<pre><code class="language-python">from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import dijkstra
+
+N = 6
+edges = [(0, 1, 1), (0, 2, 0), (1, 2, 0), (1, 3, 1), (2, 4, 1), (3, 5, 0), (4, 5, 1)]
+row = [u for u, v, w in edges]
+col = [v for u, v, w in edges]
+data = [w for u, v, w in edges]
+G = csr_matrix((data, (row, col)), shape=(N, N))
+
+print(dijkstra(G, directed=False, indices=0))</code></pre>
+<pre class="output"><code class="nohighlight">[0. 0. 0. 1. 1. 1.]</code></pre>
+
+<p>重み 0 の辺は,このように疎行列に値 0 として明示的に入れておけば辺として扱われます.ただし,2次元配列(密行列)でグラフを渡すと 0 は「辺がない」という意味になるので注意してください.</p>
+
+<h3>操作一覧</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>操作</th><th>操作内容</th><th>計算量</th></tr></thead>
+<tbody>
+<tr><td><code>deque.appendleft(x)</code></td><td>先頭に x を入れる(重み 0 の辺)</td><td>$O(1)$</td></tr>
+<tr><td><code>deque.append(x)</code></td><td>末尾に x を入れる(重み 1 の辺)</td><td>$O(1)$</td></tr>
+<tr><td><code>deque.popleft()</code></td><td>先頭を取り出す</td><td>$O(1)$</td></tr>
+<tr><td><code>dijkstra(G, directed=True, indices=s)</code></td><td>SciPy で s からの最短距離を求める</td><td>$O((N + M) \log N)$</td></tr>
+</tbody>
+</table>
+</div>
+
+<script src="../../assets/nav-data.js"></script>
+<script src="../../assets/site.js"></script>
+</body>
+</html>
