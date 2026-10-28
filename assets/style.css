@@ -176,6 +176,13 @@ figure img {
   background: #fff; border: 1px solid var(--border); border-radius: 8px;
 }
 figcaption { font-size: 0.85rem; color: var(--fg-muted); }
+details.answer {
+  margin: 0.8em 0;
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 0 16px;
+}
+details.answer summary { padding: 8px 0; cursor: pointer; color: var(--fg-muted); }
+details.answer[open] summary { border-bottom: 1px solid var(--border); margin-bottom: 0.6em; }
 
 /* ---- diagram ---- */
 .diagram svg { display: block; width: 100%; max-width: 640px; height: auto; }
